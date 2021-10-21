@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './scheme/user.schema';
 import { UserI } from './interfaces/user.interface';
 import { UserModule } from './user.module';
-import { UserRepository } from './user.repository';
+
 import { UserSql } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

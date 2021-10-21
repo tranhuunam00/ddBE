@@ -10,6 +10,8 @@ import { UserSql } from './user/entities/user.entity';
 import { UserController } from './user/user.controller';
 import {UserModule} from './user/user.module'
 import { PhotosModule } from './photos/photos.module';
+import { MessageModule } from './message/message.module';
+
 @Module({
   imports: [UserModule,EventsModule,PhotosModule,
     TypeOrmModule.forRootAsync({
@@ -21,7 +23,8 @@ import { PhotosModule } from './photos/photos.module';
     MongooseModule.forRoot('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',{
     autoCreate:true,
   }),
-    PhotosModule],
+    PhotosModule,
+    MessageModule],
   controllers: [AppController],
   providers: [AppService],
 })
