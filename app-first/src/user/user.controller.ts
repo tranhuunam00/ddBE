@@ -1,40 +1,46 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, Res, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, Res, Session, UnauthorizedException, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserI } from './interfaces/user.interface';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { BaseUserDto, CreateUserDto, UpdateUserDto, CreateUserComfirmDto } from './dto/user.dto';
 import { ValidationPipe } from '../core/validate/validate.pipe';
-import { Response,Request } from 'express';
+import { Request } from 'express';
 import { RolesGuard } from '../core/guard/user.guard';
 import { LoggingInterceptor } from 'src/core/interceptor/logger';
 import { User } from './scheme/user.schema';
+import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
+
+
 
 @UseGuards(RolesGuard)
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  // @Get('/:id')
-  // getHello(@Req() req:Request): string {
-  //   return req.params.id;
-  // }
-  @Post("/register")
-  async create(@Body()   createUserDto :CreateUserDto, @Req() req){
-    
-    const result= await this.userService.register(createUserDto);
-    console.log(result);
-    if(result!=null){
-      return "chuyển trang"
-    }
-    return "đăng kí thất bại"
+  constructor(private readonly userService: UserService , private jwtService: JwtService) {}
+  //........................update Pw...............................
+  @Put('/updatePassword')
+  async updatePassword(@Req() req: Request,@Body() body:{password:string}){
+    await this.userService.updatePassword(req.user["userName"],body.password)
   }
-  //login
-  @Post("/login")
-  async hehe( @Req() req){
-    const result =await this.userService.login(req.body)
-    if (result){return "chuyển trang"}
-    else {return "đăng nhập thất bại"}
+  // lấy thông tin qua jwt có header là cookie jwt
+  @Get("userJwt")
+  async getUserJwt(@Req() request: Request) {
+    try{
+      const cookie = request.cookies["jwt"];
+      const data =await this.jwtService.verifyAsync(cookie) ;
+      if(!data){
+        return null
+      }
+      const user=await this.userService.findById(data._id) ;  
+      return user;
+    } catch(e){return null}
   }
-
+  // đăng xuất và xóa jwt người dùng
+  @Get("logout")
+  async logout(@Res({ passthrough: true }) response: Response){
+    response.clearCookie("jwt");
+    return "logout"
+  } 
+  
   @Get()
   async index() {
     return await this.userService.findAll();

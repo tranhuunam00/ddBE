@@ -11,6 +11,14 @@ import { UserController } from './user/user.controller';
 import {UserModule} from './user/user.module'
 import { PhotosModule } from './photos/photos.module';
 import { MessageModule } from './message/message.module';
+import { ConfigModule } from '@nestjs/config';
+import { FeedModule } from './feed/feed.module';
+import { MailModule } from './mail/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { AuthModule } from './auth/auth.module';
+import { FileModule } from './file/file.module';
+
+
 
 @Module({
   imports: [UserModule,EventsModule,PhotosModule,
@@ -23,16 +31,23 @@ import { MessageModule } from './message/message.module';
     MongooseModule.forRoot('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',{
     autoCreate:true,
   }),
+    AuthModule,
     PhotosModule,
-    MessageModule],
+    MessageModule,
+    FileModule,
+    FeedModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // no need to import into other modules
+    }),
+    MailModule,
+    FileModule],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes(UserController);
-      
+    // consumer
+    //   .apply(LoggerMiddleware)
+    //   .forRoutes(UserController);
   }
 }

@@ -23,6 +23,7 @@ import { CreateMessageDto } from '../message/dto/message.dto';
     @SubscribeMessage('signin')
     signin(socket: Socket, id: number) {
       console.log(id)
+      
       clients[id]=socket;
       // console.log(clients)
     }
@@ -47,10 +48,11 @@ import { CreateMessageDto } from '../message/dto/message.dto';
         //   message: message,
         //   path: path,
         // }
-
         
         if(clients[data.targetId]!=null){
           clients[data.targetId].emit("message",data);
+          
+
         }
         this.messageService.create({...data})
      }

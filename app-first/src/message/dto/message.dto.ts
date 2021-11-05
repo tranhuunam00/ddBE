@@ -9,6 +9,8 @@ export class BaseMessageDto {
     sourceId:string
   @IsString()
     targetId:string
+  @IsString()
+    time:string
 }
 //
 export class CreateMessageDto extends BaseMessageDto {}

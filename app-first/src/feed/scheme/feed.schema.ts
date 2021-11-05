@@ -8,9 +8,14 @@ export type FeedDocument = Feed & Document;
 export class Feed {
   @Prop()
   feedString: string;
-  
+  @Prop()
+  OwnId:string;
   @Prop()
   feedImage:string
+  @Prop()
+  rule:string[]
+  @Prop()
+  createdAt:string;
 }
 
 export const FeedSchema = SchemaFactory.createForClass(Feed);
