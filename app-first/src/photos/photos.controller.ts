@@ -35,7 +35,6 @@ export class PhotosController {
         })
     )
     async uploadSingle(@UploadedFile() file ,@Res() res) {
-        
         res.json(file.path);
         console.log(file)
     }

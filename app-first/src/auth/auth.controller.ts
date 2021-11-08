@@ -3,34 +3,36 @@ import { UserService } from '../user/user.service';
 import { CreateUserDto, CreateUserComfirmDto, BaseUserDto } from '../user/dto/user.dto';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-
+var a=[]
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly userService: UserService ){}
+    constructor(private readonly userService: UserService ) {}
 
     @Post("/register")
-    async create(@Body()   createUserDto :CreateUserDto, @Req() request :Request){
+    async create(@Body()   createUserDto :CreateUserDto, @Req() request :Request) :Promise<CreateUserComfirmDto>{
     const data= await this.userService.register(createUserDto);
     console.log(data);
     if(data){
       request.session[data.userName]= data.token
-    
+      a[data.userName]=data.token
       return data;
     }
-    return "register false"
+    return new CreateUserComfirmDto()
   }
  
   //................................................
   @Post('/registerConfirm')
-  async confirm(@Body()   data: CreateUserComfirmDto, @Req() request :Request ,@Session() session: Record<string, any>){
+  async confirm(@Body()   data: CreateUserComfirmDto, @Req() request :Request ,@Session() session: Record<string, any >,@Res() res) :Promise<String> {
     console.log(data)
     console.log(session[data.userName])
-    if(data.token==session[data.userName]){
+    console.log(a[data.userName])
+
+    if(data.token==session[data.userName]||data.token==a[data.userName]){
       await this.userService.registerConfirm(data)
       delete request.session[data.userName]
-      return "resgister true"
-    }
-    return "register false"
+      return res.json("done")
+    }else{return res.json("error")}
+    
   }
 
   //login và trả về Jwt nếu đăng nhâp thành công nếu không trả về string rỗng 
@@ -46,22 +48,26 @@ export class AuthController {
   }
   //...........................................................................
   @Post("/forgotPassword")
-  async forgot(@Body() data :{userName:string,email:string},@Req() request :Request){
-    const token= await this.userService.forgot(data.userName,data.email);
-    request.session[data.userName]= token
-    return {...data,token:token}
+  async forgot(@Body() data :{userName:string,email:string},@Req() request :Request,@Res() res){
+    const user= await this.userService.forgotPassword(data.userName,data.email);
+    console.log(data)
+    if(user){request.session[data.userName]= user["token"];
+         a[data.userName]=user["token"];
+            res.json(user)
+    }
+    else{res.json("error");}
   }
   //
   @Post("/forgotPasswordConfirm")
-  async forgotConfirm(@Body() data :{userName:string,email:string,token:string},
-    @Req() request :Request ,@Session() session: Record<string, any>
-  ){
+  async forgotConfirm(@Body() data :{userName:string,email:string,token:string,password:string},
+    @Req() request :Request ,@Session() session: Record<string, any> ,@Res() res)  {
     
-    if(data.token==session[data.userName]){
-      
+    if(data.token==session[data.userName] || a[data.userName]==data.token){
+      await this.userService.updatePassword(data.userName,data.password);
       delete request.session[data.userName]
-      return "forgot true"
-    }
-    return "forgot false"
+      // delete a[data.userName]
+      res.json("done");
+    }else{res.json("error")}
+      
   }
 }

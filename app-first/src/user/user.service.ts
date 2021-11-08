@@ -30,9 +30,12 @@ export class UserService {
       //......................................đăng kí.....................................
       async register(data:CreateUserDto){
         const userMongo =await this.userModel.findOne({userName:data.userName}).exec(); 
+        const userMongoEmail=await this.userModel.findOne({email:data.email}).exec();
         const user = userMongo?userMongo.toObject():userMongo;
+        const userEmail = userMongoEmail?userMongoEmail.toObject():userMongoEmail;
+
           console.log(user)
-          if(user==null){
+          if(user==null && userEmail==null){
             console.log("dang ki oki.....");
             
             const token = Math.floor(1000 + Math.random() * 9000).toString();
@@ -57,7 +60,22 @@ export class UserService {
       }
 
       //forgot.................................
-      async forgot(userName:string,email: string){
+      async forgotPassword(userName:string,email: string){
+        const userMongo =await this.userModel.findOne({userName:userName,email:email}).exec(); 
+        
+        const user = userMongo?userMongo.toObject():userMongo;
+        
+        if(user!=null){
+          console.log("..forgot ..----ok--------------------");
+          const token = Math.floor(1000 + Math.random() * 9000).toString();
+          await this.mailService.sendUserConfirmation(userName,email,token);
+          console.log(token);
+          return {userName: userName, email: email, token: token}
+        }
+        else{
+          console.log("email và tài khoản chưa đúng")
+          return null;
+        } 
         const token = Math.floor(1000 + Math.random() * 9000).toString();
         await this.mailService.sendUserConfirmation(userName, email, token);
         return token

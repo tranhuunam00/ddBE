@@ -3,7 +3,7 @@ import { IsInt, IsNotEmpty, IsString } from "class-validator";
 export class BaseUserDto {
  
   userName: string;
-  age: string;
+
   password: string;
   email: string;
 }
