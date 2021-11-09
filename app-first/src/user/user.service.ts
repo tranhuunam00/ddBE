@@ -156,6 +156,7 @@ export class UserService {
       async updatePassword(userName: string,password: string){
         const hashedPassword = await bcrypt.hash(password,12);
         await this.userModel.findOneAndUpdate({userName:userName},{password:hashedPassword})
+        
       }
       //.........................................update..........................
       async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {

@@ -51,23 +51,37 @@ export class AuthController {
   async forgot(@Body() data :{userName:string,email:string},@Req() request :Request,@Res() res){
     const user= await this.userService.forgotPassword(data.userName,data.email);
     console.log(data)
-    if(user){request.session[data.userName]= user["token"];
-         a[data.userName]=user["token"];
-            res.json(user)
+    if(user){
+      request.session[data.userName]= user["token"];
+      a[data.userName]=user["token"];
+        
+      res.json(user)
     }
     else{res.json("error");}
   }
   //
+
   @Post("/forgotPasswordConfirm")
-  async forgotConfirm(@Body() data :{userName:string,email:string,token:string,password:string},
+  async forgotConfirm(@Body() data :{userName:string,email:string,token:string},
     @Req() request :Request ,@Session() session: Record<string, any> ,@Res() res)  {
-    
-    if(data.token==session[data.userName] || a[data.userName]==data.token){
+    console.log(data)
+    console.log(a[data.userName]);
+    console.log()
+    if(data.token==session[data.userName] || data.token==a[data.userName]){
+      delete request.session[data.userName]
+      return res.json("done")
+    }else{return res.json("error")}
+  }
+  @Post("forgotNewPassword")
+  async forgotNewPassword(@Body() data :{userName:string,email:string,token:string,password:string},
+    @Req() request :Request ,@Session() session: Record<string, any> ,@Res() res)  {
+    console.log(data)
+    console.log(a[data.userName]);
+    console.log()
+    if(data.token==session[data.userName] || data.token==a[data.userName]){
       await this.userService.updatePassword(data.userName,data.password);
       delete request.session[data.userName]
-      // delete a[data.userName]
-      res.json("done");
-    }else{res.json("error")}
-      
+      return res.json("done")
+    }else{return res.json("error")}
   }
 }

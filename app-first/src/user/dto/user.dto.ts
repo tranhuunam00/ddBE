@@ -1,9 +1,7 @@
 import { IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class BaseUserDto {
- 
   userName: string;
-
   password: string;
   email: string;
 }
