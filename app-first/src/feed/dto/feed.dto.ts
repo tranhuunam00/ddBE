@@ -2,11 +2,11 @@ import { IsArray, IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class BaseFeedDto {
   @IsString()
-   pathImg: string 
+    pathImg: string 
   @IsString()
-   message:string
+    messages:string 
   @IsString()
-    sourceId:string
+    sourceEmail:string
   @IsArray()
     rule:string[]
   @IsString()

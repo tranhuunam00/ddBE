@@ -8,11 +8,17 @@ export type UserDocument = User & Document;
 export class User {
   @Prop({ required: true })
   userName: string;
- 
+  
   @Prop()
   email: string;
   @Prop()
   password:string
+  @Prop()
+  friend:string[]
+  @Prop()
+  friendRequest:string[]
+  @Prop()
+  friendConfirm:string[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

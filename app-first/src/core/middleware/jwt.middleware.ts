@@ -19,10 +19,13 @@ export class JwtMiddleware implements NestMiddleware {
             req.user = user;
             next();
         }else{
-            return "k có jwwt"
+            console.log("jwt hết hạn")
+            res.json("not jwt")
         }
         
-      } catch(e){return null}
+      } catch(e){
+        res.json("not jwt")
+        return null}
 
     // if(headers.authorization){ next();}
     // throw new UnauthorizedException();

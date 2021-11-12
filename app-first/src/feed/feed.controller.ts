@@ -1,4 +1,4 @@
-import { Req } from '@nestjs/common';
+import { Req, Res } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
 import { CreateFeedDto } from './dto/feed.dto';
 
@@ -10,8 +10,9 @@ export class FeedController {
         private feedService: FeedService
     ){}
     @Post("")
-    async create(@Body()   createFeedDto :CreateFeedDto, @Req() req){
-        
-        return await this.feedService.create(createFeedDto);
+    async create(@Body()   createFeedDto :CreateFeedDto, @Req() req ,@Res() res) {
+        console.log(createFeedDto)
+        await this.feedService.create(createFeedDto);
+        res.json("done")
     }
 }

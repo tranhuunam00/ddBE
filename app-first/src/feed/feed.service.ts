@@ -11,7 +11,6 @@ export class FeedService {
         console.log("create")
         let newfeed=new this.feedModel({
                       ...data,
-                      
                     })
         return await  newfeed.save()
     }   

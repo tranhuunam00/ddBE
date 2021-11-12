@@ -2,6 +2,7 @@ import { Body, Controller, Post, Req, Res, Session } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { CreateUserDto, CreateUserComfirmDto, BaseUserDto } from '../user/dto/user.dto';
 import { Request, Response } from 'express';
+import { Server,Socket  } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 var a=[]
 @Controller('auth')
@@ -37,10 +38,19 @@ export class AuthController {
 
   //login và trả về Jwt nếu đăng nhâp thành công nếu không trả về string rỗng 
   @Post("/login")
-  async login(@Body() data:BaseUserDto ,@Req() req , @Res({ passthrough: true }) response: Response) {
+  async login(@Body() data :{userName:string,password:string} ,@Req() req , socket: Socket,
+  @Res({ passthrough: true }) response: Response,@Session() session: Record<string, any>) {
+   
     const jwt =await this.userService.login(data)
+   
+    
+      // console.log(clients)
     console.log(jwt)
-    if (jwt){ 
+    if (jwt){
+      let clients={};
+      
+      console.log(clients)
+      session.clients= clients;
       response.cookie("jwt",jwt,{httpOnly:true});
       return jwt;
     }
@@ -48,13 +58,14 @@ export class AuthController {
   }
   //...........................................................................
   @Post("/forgotPassword")
-  async forgot(@Body() data :{userName:string,email:string},@Req() request :Request,@Res() res){
+  async forgot(@Body() data :{userName:string,email:string},@Req() request :Request
+  ,@Res() res,@Session() session: Record<string, any>){
     const user= await this.userService.forgotPassword(data.userName,data.email);
     console.log(data)
     if(user){
-      request.session[data.userName]= user["token"];
+      session[data.userName]= user["token"];
       a[data.userName]=user["token"];
-        
+      
       res.json(user)
     }
     else{res.json("error");}
@@ -72,6 +83,7 @@ export class AuthController {
       return res.json("done")
     }else{return res.json("error")}
   }
+  
   @Post("forgotNewPassword")
   async forgotNewPassword(@Body() data :{userName:string,email:string,token:string,password:string},
     @Req() request :Request ,@Session() session: Record<string, any> ,@Res() res)  {
@@ -83,5 +95,16 @@ export class AuthController {
       delete request.session[data.userName]
       return res.json("done")
     }else{return res.json("error")}
+  }
+
+  @Post("logout")
+  async logout(@Body() data:{jwt:string} , @Res() res){
+    console.log("-------------run logout------------------")
+    console.log(data.jwt)
+    let  a= await this.userService.logout(data.jwt)
+    if(a=="done"){
+       res.json("done")
+    }else{ res.json("error")}
+   
   }
 }

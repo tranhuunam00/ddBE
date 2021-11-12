@@ -1,14 +1,16 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, Res, Session, UnauthorizedException, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, ValidationPipe, Get, Param, ParseIntPipe, Post, Put, Req, Res, Session, UnauthorizedException, UseGuards, UseInterceptors, UsePipes, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserI } from './interfaces/user.interface';
 import { BaseUserDto, CreateUserDto, UpdateUserDto, CreateUserComfirmDto } from './dto/user.dto';
-import { ValidationPipe } from '../core/validate/validate.pipe';
+
 import { Request } from 'express';
 import { RolesGuard } from '../core/guard/user.guard';
 import { LoggingInterceptor } from 'src/core/interceptor/logger';
 import { User } from './scheme/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
+import { FilterMessageDto } from '../message/dto/message_param.dto';
+
 
 
 
@@ -25,20 +27,62 @@ export class UserController {
   @Get("userJwt")
   async getUserJwt(@Req() request: Request) {
     try{
+      
       const cookie = request.cookies["jwt"];
       const data =await this.jwtService.verifyAsync(cookie) ;
       if(!data){
         return null
       }
-      const user=await this.userService.findById(data._id) ;  
+      console.log(data)
+      const user=await this.userService.findOne(data.userName);  
+      
       return user;
     } catch(e){return null}
   }
-  // đăng xuất và xóa jwt người dùng
+  // =-------------------đăng xuất và xóa jwt người dùng--------------
   @Get("logout")
   async logout(@Res({ passthrough: true }) response: Response){
     response.clearCookie("jwt");
     return "logout"
+  } 
+  //-------------------addfr---------------------------------------
+ 
+  @Get("addfr/:data")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async addFr(@Res ({ passthrough: true }) response: Response,
+  @Param("data") data: string,
+  @Req() request :Request ,@Session() session: Record<string, any>){
+    console.log(request.user)
+    let user=request.user;
+    console.log(data)
+    let result = await this.userService.addFr(request.user,data)
+    
+    response.json(result)
+  } 
+  @Get("addfrConfirm/:id")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async addFrConfirm(@Res ({ passthrough: true }) response: Response,
+  @Param("id") id: string,
+  @Req() request :Request ,@Session() session: Record<string, any>){
+    console.log(request.user)
+    let user=request.user;
+    console.log(id)
+    let result = await this.userService.addFrConfirm(request.user,id)
+    
+     response.json(result) 
+  } 
+
+  @Get("removeFriend/:id")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async removeFriend(@Res ({ passthrough: true }) response: Response,
+  @Param("id") id: string,
+  @Req() request :Request ,@Session() session: Record<string, any>){
+    console.log(request.user)
+    let user=request.user;
+    console.log(id)
+    let result = await this.userService.removeFriend(request.user,id)
+    if(result !="error"){ response.json(result) }
+    else{ response.json("not") }
   } 
   
   @Get()

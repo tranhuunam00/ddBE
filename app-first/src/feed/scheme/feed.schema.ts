@@ -7,11 +7,11 @@ export type FeedDocument = Feed & Document;
 
 export class Feed {
   @Prop()
-  feedString: string;
+  messages: string;
   @Prop()
-  OwnId:string;
+  sourceEmail:string;
   @Prop()
-  feedImage:string
+  pathImg:string
   @Prop()
   rule:string[]
   @Prop()

@@ -11,13 +11,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MailModule } from '../mail/mail.module';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
+import { EventsModule } from '../events/event.module';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserSql]),DatabaseModule,MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
   JwtModule.register({
     secret: "secretKey",
-    signOptions: { expiresIn: '20s' },
+    signOptions: { expiresIn: '500s' },
   }),
+  EventsModule,
   MailModule
   ],
   controllers: [UserController],
