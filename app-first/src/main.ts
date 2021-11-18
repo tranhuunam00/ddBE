@@ -24,7 +24,9 @@ async function bootstrap() {
   app.enableCors({
     credentials:true
   });//UPLOAD ẢNH.......
-  app.use("/upload",express.static(join(__dirname,"..",'src/upload')));
+  app.use("/upload",express.static(join(__dirname,"..",'../upload')));
+
+  console.log(__dirname)
   app.use(
     session({
       secret: 'my-secret',

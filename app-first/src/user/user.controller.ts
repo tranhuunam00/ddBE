@@ -10,6 +10,7 @@ import { User } from './scheme/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { FilterMessageDto } from '../message/dto/message_param.dto';
+import { FileService } from '../file/file.service';
 
 
 
@@ -17,7 +18,10 @@ import { FilterMessageDto } from '../message/dto/message_param.dto';
 @UseGuards(RolesGuard)
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService , private jwtService: JwtService) {}
+  constructor(private readonly userService: UserService ,
+     private jwtService: JwtService,
+
+     ) {}
   //........................update Pw...............................
   @Put('/updatePassword')
   async updatePassword(@Req() req: Request,@Body() body:{password:string}){
@@ -25,19 +29,20 @@ export class UserController {
   }
   // lấy thông tin qua jwt có header là cookie jwt
   @Get("userJwt")
-  async getUserJwt(@Req() request: Request) {
+  async getUserJwt(@Req() request: Request,@Res() res: Response) {
     try{
       
       const cookie = request.cookies["jwt"];
       const data =await this.jwtService.verifyAsync(cookie) ;
       if(!data){
-        return null
+        return res.json("error")
       }
       console.log(data)
+      const token = await this.userService.findOneJwt(cookie)
       const user=await this.userService.findOne(data.userName);  
-      
-      return user;
-    } catch(e){return null}
+      if(token.isLogin==true){  return res.json(user);}
+      else{return res.json("error")}
+    } catch(e){return res.json("error")}
   }
   // =-------------------đăng xuất và xóa jwt người dùng--------------
   @Get("logout")
@@ -84,6 +89,22 @@ export class UserController {
     if(result !="error"){ response.json(result) }
     else{ response.json("not") }
   } 
+
+  @Get("removeFrRequest/:id")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async removeFrRequest(@Res ({ passthrough: true }) response: Response,
+  @Param("id") id: string,
+  @Req() request :Request ,@Session() session: Record<string, any>){
+    console.log(request.user)
+    let user=request.user;
+    console.log(id)
+    let result = await this.userService.removeFrRequest(request.user,id)
+    response.json(result) 
+    
+  } 
+  
+
+  //--------------------change avatar or ảnh bìa----------
   
   @Get()
   async index() {

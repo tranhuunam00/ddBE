@@ -1,29 +1,31 @@
-import { Controller, Get, Inject, Param, ParseIntPipe, Post, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Inject, Param, ParseIntPipe, Post, Req, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { buffer } from 'stream/consumers';
 import {diskStorage} from "multer"
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable, Observer } from 'rxjs';
 import path from 'path/posix';
 import { MessageModule } from '../message/message.module';
 import { MessageService } from '../message/message.service';
 import { createWriteStream } from 'fs';
+import { UserService } from '../user/user.service';
 
 
 @Controller('file')
 export class FileController {
-    constructor(private readonly messageService: MessageService){}
+    constructor(private readonly messageService: MessageService,
+        private userService: UserService
+        ){}
     @Post("img/upload")
     @UseInterceptors(
         FileInterceptor("img",{
             storage:diskStorage({
-                destination:"D:/ddBe/img_upload",
+                destination:"../upload",
                 filename:(req,file,cb)=>{
                     console.log(file.originalname+uuidv4())
                     let array=file.originalname.split('.')
                     const filename = uuidv4();
-
                     const extension = array[array.length-1];
                     console.log(extension)
                      cb(null,`${filename}.${extension}`)
@@ -36,19 +38,34 @@ export class FileController {
             
         })
     )
-    async uploadSingleImg(@UploadedFile() file ,@Res() res) {
-        res.json(file.path);
-        console.log(file)
+    async uploadSingleImg(@UploadedFile() file ,@Res() res : Response, @Req() req: Request) {
+        try{
+            console.log("userOwn id " + req.user["_id"])
+            console.log( "body " + req.body.eventChangeImgUser)
+            if(req.body.eventChangeImgUser != undefined && req.body.eventChangeImgUser != null){
+                if(req.body.eventChangeImgUser == "avatar" || req.body.eventChangeImgUser == "cover"){
+                    let a:string[] = file.path.split("\\");
+                    let pathImg = a[2];
+                    let result = await this.userService.changeUserImg(req.body.eventChangeImgUser,pathImg,req.user["_id"],)
+                    if(result=="done"){
+
+                        return res.json(pathImg);
+                    }else{
+                        return res.json("error")
+                    }
+                }else{return res.json("error")} 
+            }else{return res.json("error")}
+        }catch(err){return res.json("error")}
     }
     //..............................download................................
 
-    @Get("download/:fileId")
-    download(@Res() res,@Param("fileId") fileId: number,){
-        console.log(fileId)
+    @Get("download/:fileName")
+    download(@Res() res, @Param() params){
+        console.log(params.fileName)
         // let param=res.params["id"]
         // console.log(param)
-        const fileName="0a0d64a1-f384-4ded-b6c7-bdfc88d579d0.jpg"
-        return  res.download("src/upload/"+fileName)
+    
+        return  res.download("../upload/"+params.fileName)
     }
     //...............................upload cách 2...........................
 
@@ -61,13 +78,14 @@ export class FileController {
         fileStream.end()
         res.json("oki")
     }
+    //................................upload multi.--------------------------
     @Post('uploadFiles')
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'img', maxCount: 2 },
         { name: 'background', maxCount: 1 },
         ],{
             storage:diskStorage({
-                destination:"D:/ddBe/img_upload",
+                destination:"../upload",
                 filename:(req,file,cb)=>{
                     console.log(file.originalname+uuidv4())
                     let array=file.originalname.split('.')

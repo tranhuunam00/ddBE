@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { TokenDocument, TokenSchema } from './scheme/token.schema';
+import { TokenDocument, TokenSchema, Token } from './scheme/token.schema';
 import { MailService } from '../mail/mail.service';
 import {  BaseTokenDto } from './dto/token.dto';
 var tokenUser =[]
@@ -35,6 +35,8 @@ export class UserService {
       server: Server
       //......................................đăng kí.....................................
       async register(data:CreateUserDto){
+        if(data.userName.length<6) {return null}
+        if(data.password.length<6) {return null}
         const userMongo =await this.userModel.findOne({userName:data.userName}).exec(); 
         const userMongoEmail=await this.userModel.findOne({email:data.email}).exec();
         const user = userMongo?userMongo.toObject():userMongo;
@@ -99,10 +101,13 @@ export class UserService {
         return await this.userModel.find({}).exec();
       }
       async findById(id: string): Promise<any>{
-        const userMongo= await this.userModel.findOne().exec();
-        let user = userMongo.toObject();
+        try{
+          const userMongo= await this.userModel.findOne({id:id}).exec();
+          let user = userMongo.toObject();
           const {password,...result}=user;
           return result
+        }catch(e){return null}
+        
       }
       
       //.....................................login..........................................
@@ -165,11 +170,19 @@ export class UserService {
       }
       //............................tìm kiếm theo tên......................................
       async findOne(userName: string): Promise<Object> {
-        let userMongo= await this.userModel.findOne({userName:userName}).exec();
-        let user = userMongo.toObject();
+        try{let userMongo= await this.userModel.findOne({userName:userName}).exec();
+         let user = userMongo.toObject();
          const {password,...result}=user;
          return result
+        }catch(e){return {} }
+         
        }
+      async findOneJwt(jwt:string):Promise<Token>{
+        try{let userToken=await this.tokenModel.findOne({Token:jwt})
+        return userToken.toObject()
+       
+        } catch(err){return null}
+      }
       //...................................update pw.............................
       async updatePassword(userName: string,password: string){
         const hashedPassword = await bcrypt.hash(password,12);
@@ -186,14 +199,17 @@ export class UserService {
       }
       //------------------------logout-----------------------------
       async logout(jwt) : Promise<String> {
-        let a = await this.tokenModel.findOne({Token:jwt}).exec();
-        if(a._id!=null){
-          console.log(a);
-          let token=a.toObject();
-          await this.tokenModel.findOneAndUpdate({Token:jwt},{isLogin:false})
-          return "done";
-        }
-        return "error";
+        try{
+          let a = await this.tokenModel.findOne({Token:jwt}).exec();
+          if(a._id!=null){
+            console.log(a);
+            let token=a.toObject();
+            await this.tokenModel.findOneAndUpdate({Token:jwt},{isLogin:false})
+            return "done";
+          }
+          return "error";
+        }catch(e) {return "error";}
+        
       }
       //------------------------add fr------------------------------
       async addFr(userOwn,data) : Promise<String>{
@@ -250,8 +266,6 @@ export class UserService {
           return "error"
         }
         // this.server.emit('test'," test ");
-        
-        
       }
       async addFrConfirm(userOwn,id:string) : Promise<String>{
         try{
@@ -323,45 +337,167 @@ export class UserService {
       async removeFriend(userOwn,id:string){
         try{
           var a =await this.userModel.findOne({_id:id})
-        console.log("tên người đang truy cập  "+userOwn.userName )
-        console.log("người đã yêu cầu bị hủy "+a.userName)
-        if(a!=null){
-          let j=0
-          console.log("có người dùng.....")
-          let user= a.toObject()
-          let friendOwn=userOwn.friend
-          for(let i=0; i<friendOwn.length; i++){
-            if(friendOwn[i]==id||friendOwn[i]==null){
-              if(friendOwn[i]==id){j=1}
-              console.log(" bằng")
-              friendOwn.splice(i, 1); 
-              i=i-1
+          console.log("tên người đang truy cập  "+userOwn.userName )
+          console.log("người đã yêu cầu bị hủy "+a.userName)
+          if(a!=null){
+            let j=0
+            console.log("có người dùng.....")
+            let user= a.toObject()
+            let friendOwn=userOwn.friend
+            for(let i=0; i<friendOwn.length; i++){
+              if(friendOwn[i]==id||friendOwn[i]==null){
+                if(friendOwn[i]==id){j=1}
+                console.log(" bằng")
+                friendOwn.splice(i, 1); 
+                i=i-1
+              }
             }
-          }
-          let friend1=user.friend
-          friend1.push(userOwn.id)
-          for(let i=0; i<friend1.length; i++){
-            if(friend1[i]==userOwn._id.toString()||friend1[i]==null){
-              console.log("cũng bằng")
-              friend1.splice(i, 1);
-              i=i-1
+            let friend1=user.friend
+            friend1.push(userOwn.id)
+            for(let i=0; i<friend1.length; i++){
+              if(friend1[i]==userOwn._id.toString()||friend1[i]==null){
+                console.log("cũng bằng")
+                friend1.splice(i, 1);
+                i=i-1
+              }
             }
-          }
-          console.log("bạn của chủ")
-          console.log(friendOwn)
-          console.log("bạn của người bị xóa")
-          console.log(friend1)
-          console.log(j)
-          if(j==1){
-            await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friend:friendOwn})
-              await this.userModel.findOneAndUpdate({_id:id},{friend:friend1})
-            return "done"
+            console.log("bạn của chủ")
+            console.log(friendOwn)
+            console.log("bạn của người bị xóa")
+            console.log(friend1)
+            console.log(j)
+            if(j==1){
+              await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friend:friendOwn})
+                await this.userModel.findOneAndUpdate({_id:id},{friend:friend1})
+              return "done"
+            }else{return "error"}
+            
           }else{return "error"}
-          
-        }else{return "error"}
         }catch(e){return "error"}
       }
       
       //.........................remove fr request...................
-      async removeFrRequest(){}
+      async removeFrRequest(userOwn,id){
+        try{
+          let isRequest = false;
+          let isConfirm = false;
+          var a =await this.userModel.findOne({_id:id})
+          console.log("tên người đang truy cập  "+userOwn.userName )
+          console.log("người đã yêu cầu bị hủy "+a.userName)
+          if(a!=null){
+            let j=0
+            console.log("có người dùng.....")
+            let user= a.toObject()
+            let friendRequestOwn=userOwn.friendRequest
+            for(let i=0; i<friendRequestOwn.length; i++){
+              if(friendRequestOwn[i]==id||friendRequestOwn[i]==null){
+                if(friendRequestOwn[i]==id){isRequest=true}
+                console.log(" bằng ")
+                friendRequestOwn.splice(i, 1); 
+                i=i-1
+              }
+            }
+
+            let friendConfirm = user.friendConfirm
+            friendConfirm.push(userOwn.id)
+            for(let i=0; i<friendConfirm.length; i++){
+              if(friendConfirm[i]==userOwn._id.toString()||friendConfirm[i]==null){
+                if(friendConfirm[i]==userOwn._id.toString()){ isConfirm = true;}
+                console.log("cũng bằng")
+                friendConfirm.splice(i, 1);
+                i=i-1
+              }
+            }
+            console.log("request của chủ")
+            console.log(friendRequestOwn)
+            console.log("confirm của người bị xóa")
+            console.log(friendConfirm)
+            if(isRequest==false){
+              return "had not request"
+            }
+            if(isConfirm==false){
+              return "had not confirm"
+            }
+            if(isRequest==true && isConfirm==true){
+              await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friendRequest:friendRequestOwn})
+              await this.userModel.findOneAndUpdate({_id:id},{friendConfirm:friendConfirm})
+              return "done"
+            }else{return "error"}
+            
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
+      //...............................remove confirm ............
+      async removeFrConfirm(userOwn,id){
+        try{
+          let isRequest = false;
+          let isConfirm = false;
+          var a =await this.userModel.findOne({_id:id})
+          console.log("tên người đang truy cập  "+userOwn.userName )
+          console.log("người đã yêu cầu bị hủy "+a.userName)
+          if(a!=null){
+            let j=0
+            console.log("có người dùng.....")
+            let user= a.toObject()
+            let friendConfirmOwn=userOwn.friendConfirm
+            for(let i=0; i<friendConfirmOwn.length; i++){
+              if(friendConfirmOwn[i]==id||friendConfirmOwn[i]==null){
+                if(friendConfirmOwn[i]==id){isConfirm=true}
+                console.log(" bằng ")
+                friendConfirmOwn.splice(i, 1); 
+                i=i-1
+              }
+            }
+
+            let friendRequest = user.friendRequest
+            friendRequest.push(userOwn.id)
+            for(let i=0; i<friendRequest.length; i++){
+              if(friendRequest[i]==userOwn._id.toString()||friendRequest[i]==null){
+                if(friendRequest[i]==userOwn._id.toString()){ isRequest = true;}
+                console.log("cũng bằng")
+                friendRequest.splice(i, 1);
+                i=i-1
+              }
+            }
+            console.log("comfirm của chủ")
+            console.log(friendConfirmOwn)
+            console.log("request của người bị xóa")
+            console.log(friendRequest)
+            
+            if(isConfirm==false){
+              return "had not confirm"
+            }
+            if(isRequest==false){
+              return "had not request"
+            }
+            if(isRequest==true && isConfirm==true){
+              await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friendConfirm:friendConfirmOwn})
+              await this.userModel.findOneAndUpdate({_id:id},{friendRequest:friendRequest})
+              return "done"
+            }else{return "error"}
+            
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
+      //-------------thay đổi avatar hoặc ảnh bìa-------------
+      async changeUserImg(event:string,path: string,sourceUserId:string){
+        try{
+          let userName = await this.userModel.findOne({_id:sourceUserId})
+          
+          if(event=="avatar"){
+            let listImg =userName.avatarImg;
+            listImg.push(path)
+            await this.userModel.findByIdAndUpdate({_id:sourceUserId},{avatarImg:listImg});
+            return "done"
+          }else{if(event=="cover"){
+            let listImg =userName.coverImg;
+            listImg.push(path)
+            await this.userModel.findByIdAndUpdate({_id:sourceUserId},{coverImg:listImg});
+            return "done"
+            }else{return "error"}
+          }
+        }
+        catch(e){return "error"}
+      }
+      
 }

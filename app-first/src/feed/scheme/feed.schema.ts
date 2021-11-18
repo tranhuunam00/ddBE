@@ -9,9 +9,13 @@ export class Feed {
   @Prop()
   messages: string;
   @Prop()
-  sourceEmail:string;
+  sourceUserId:string;
   @Prop()
-  pathImg:string
+  like:string[];
+  @Prop()
+  sourceUserName:string;
+  @Prop()
+  pathImg:string[]
   @Prop()
   rule:string[]
   @Prop()

@@ -35,20 +35,17 @@ export class AuthController {
     }else{return res.json("error")}
     
   }
-
+  
   //login và trả về Jwt nếu đăng nhâp thành công nếu không trả về string rỗng 
   @Post("/login")
   async login(@Body() data :{userName:string,password:string} ,@Req() req , socket: Socket,
   @Res({ passthrough: true }) response: Response,@Session() session: Record<string, any>) {
    
     const jwt =await this.userService.login(data)
-   
-    
       // console.log(clients)
     console.log(jwt)
     if (jwt){
       let clients={};
-      
       console.log(clients)
       session.clients= clients;
       response.cookie("jwt",jwt,{httpOnly:true});

@@ -8,11 +8,14 @@ export type UserDocument = User & Document;
 export class User {
   @Prop({ required: true })
   userName: string;
-  
   @Prop()
   email: string;
   @Prop()
   password:string
+  @Prop()
+  avatarImg: string[];
+  @Prop()
+  coverImg: string[];
   @Prop()
   friend:string[]
   @Prop()

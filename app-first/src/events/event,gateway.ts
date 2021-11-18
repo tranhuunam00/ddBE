@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
     MessageBody,
     SubscribeMessage,
     WebSocketGateway,
@@ -10,28 +11,30 @@ import {
   import { Server,Socket  } from 'socket.io';
   import { MessageService } from '../message/message.service';
   import { CreateMessageDto } from '../message/dto/message.dto';
-import { Session } from '@nestjs/common';
+  import { Session } from '@nestjs/common';
+  import { MiddlewareBuilder } from '@nestjs/core';
+import { Console } from 'console';
+
+
   var clients={};
-
-
   @WebSocketGateway()
   export class EventsGateway {
 
     constructor(private messageService : MessageService){}
 
-
     @WebSocketServer()
     server: Server;
     
     @SubscribeMessage('signin')
-    signin( @MessageBody() id:string ,socket: Socket,@Session() session: Record<string, any>
+    signin( @MessageBody() id:string ,@ConnectedSocket() socket: Socket,@Session() session: Record<string, any>
     ) {
+      console.log("----------run signin socket-------------------")
       console.log(id)
-      // clients[userName]=socket;
       clients[id]=socket;
-      session.clients=clients;
-      // console.log(clients)
+      
     }
+
+    
 
     @SubscribeMessage('message')
       async CreateMessage(@MessageBody() data: any) {
@@ -45,29 +48,32 @@ import { Session } from '@nestjs/common';
           clients[data.targetId].emit("message",data);
         }
         this.messageService.create({...data})
-     }
-     @SubscribeMessage('postFeed')
-      async CreatePost(@MessageBody() data: any) {
+    }
+    //------------------------create feed --------------
+    @SubscribeMessage('postFeedServer')
+      async CreateFeed(@MessageBody() data: any) {
         console.log(data)
-        console.log(data.message)
-        console.log("all server..............................online..............")
-        for(var i in clients) {
-          console.log(i);
+    }
+    //----------------------like feed------------------
+    async likeFeed(data: any,feedUserId:string) {
+        if(feedUserId in clients){
+          clients[feedUserId].emit("likeFeed",data)
         }
-        if(clients[data.targetId]!=null){
-          clients[data.targetId].emit("message",data);
-        }
-        this.messageService.create({...data})
-     }
-     
-     @SubscribeMessage('test')
+    }
+    @SubscribeMessage('test')
       test(@MessageBody() data: any) {
-      
-       this.server.emit('test'," test ");
- 
-     
+        console.log(data);
+       this.server.emit('test',data);
+    }
+    //--------------------------function create newfeed------------------
+    async createNewFeed ( data: any,listFr: string[]) {
+        console.log(data);
+        for(let i=0;i<listFr.length;i++){
+          if(listFr[i] in clients){
+              console.log("--da emit-------")
+              clients[listFr[i]].emit("test",data)}
+        }
       }
-
     @SubscribeMessage('identity')
     async identity(@MessageBody() data: number): Promise<number> {
       return data;
