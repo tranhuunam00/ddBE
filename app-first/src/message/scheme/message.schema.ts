@@ -17,6 +17,7 @@ export class Message {
   targetId: string;
   @Prop()
   time: string;
+  
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

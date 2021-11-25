@@ -11,6 +11,8 @@ export class User {
   @Prop()
   email: string;
   @Prop()
+  realName: string;
+  @Prop()
   password:string
   @Prop()
   avatarImg: string[];
@@ -22,6 +24,8 @@ export class User {
   friendRequest:string[]
   @Prop()
   friendConfirm:string[]
+  @Prop()
+  hadMessageList:string[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

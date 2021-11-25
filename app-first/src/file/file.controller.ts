@@ -39,6 +39,7 @@ export class FileController {
         })
     )
     async uploadSingleImg(@UploadedFile() file ,@Res() res : Response, @Req() req: Request) {
+        console.log(file)
         try{
             console.log("userOwn id " + req.user["_id"])
             console.log( "body " + req.body.eventChangeImgUser)
@@ -46,15 +47,23 @@ export class FileController {
                 if(req.body.eventChangeImgUser == "avatar" || req.body.eventChangeImgUser == "cover"){
                     let a:string[] = file.path.split("\\");
                     let pathImg = a[2];
+                    console.log(pathImg)
                     let result = await this.userService.changeUserImg(req.body.eventChangeImgUser,pathImg,req.user["_id"],)
                     if(result=="done"){
-
                         return res.json(pathImg);
                     }else{
                         return res.json("error")
                     }
-                }else{return res.json("error")} 
+                }else{
+                    if(req.body.eventChangeImgUser=="message"){
+                        let a:string[] = file.path.split("\\");
+                        let pathImg = a[2];
+                        return res.json(pathImg);
+                    }else{return res.json("error")
+                }} 
+                
             }else{return res.json("error")}
+
         }catch(err){return res.json("error")}
     }
     //..............................download................................

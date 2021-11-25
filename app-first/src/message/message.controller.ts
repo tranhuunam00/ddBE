@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Request } from 'express';
 import { CreateMessageDto } from './dto/message.dto';
 import { FilterMessageDto } from './dto/message_param.dto';
 import { MessageService } from './message.service';
 import { Message } from './scheme/message.schema';
+import { AllMsgFrI } from './interFace/msgListFr';
 
 @Controller('message')
 export class MessageController {
@@ -31,7 +33,21 @@ export class MessageController {
        return data.reverse();
        console.log(data.reverse());
     }
+    
+    @Get("/allMsgFR") 
+    @UsePipes(new ValidationPipe({ transform: true }))
 
+    async findAllMessage( @Query() data: {limit:number, offset:number},@Req() req: Request):Promise<AllMsgFrI>{
+       let {limit,offset}=data;
+       if(limit==undefined){limit=30}
+       if(offset==undefined){offset=0}
+       const sourceId=req.user["_id"];
+       const hadMessageList =req.user["hadMessageList"];
+       console.log(hadMessageList)
+       var result= await this.messageService.findAllMessageFr(limit,offset,sourceId,hadMessageList);
+       return result;
+      
+    }
 
     @Get(":roomId/messages")
     @UsePipes(new ValidationPipe({ transform: true }))

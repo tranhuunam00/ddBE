@@ -21,7 +21,7 @@ import { FileModule } from './file/file.module';
 
 
 @Module({
-  imports: [UserModule,EventsModule,PhotosModule,
+  imports: [UserModule,PhotosModule,
     TypeOrmModule.forRootAsync({
       useFactory: async () =>
         Object.assign(await getConnectionOptions(), {

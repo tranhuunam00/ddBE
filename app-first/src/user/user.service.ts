@@ -19,6 +19,7 @@ import {  BaseTokenDto } from './dto/token.dto';
 var tokenUser =[]
 import { Server,Socket  } from 'socket.io';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { MessageService } from '../message/message.service';
 
 @WebSocketGateway()
 @Injectable()
@@ -29,7 +30,7 @@ export class UserService {
   private usersRepository: Repository<UserSql>,
   private jwtService: JwtService,
   private mailService: MailService,
-  
+ 
   ){}
       @WebSocketServer()
       server: Server
@@ -102,11 +103,13 @@ export class UserService {
       }
       async findById(id: string): Promise<any>{
         try{
-          const userMongo= await this.userModel.findOne({id:id}).exec();
-          let user = userMongo.toObject();
+          const userMongo= await this.userModel.findOne({_id:id}).exec();
+          if(userMongo==null){return {}}
+          else{let user = userMongo.toObject();
           const {password,...result}=user;
-          return result
-        }catch(e){return null}
+          return result}
+          
+        }catch(e){return {}}
         
       }
       
@@ -171,9 +174,13 @@ export class UserService {
       //............................tìm kiếm theo tên......................................
       async findOne(userName: string): Promise<Object> {
         try{let userMongo= await this.userModel.findOne({userName:userName}).exec();
-         let user = userMongo.toObject();
-         const {password,...result}=user;
-         return result
+          if(userMongo==null){return {}}
+          else{ 
+            let user = userMongo.toObject();
+            const {password,...result}=user;
+            return result
+          }
+        
         }catch(e){return {} }
          
        }
@@ -214,60 +221,73 @@ export class UserService {
       //------------------------add fr------------------------------
       async addFr(userOwn,data) : Promise<String>{
         try{
+          var c= await this.userModel.findOne({_id:data}).exec()
+          console.log("c là ")
+          console.log(c)
           var a =await this.userModel.findOne({userName:data}).exec()
-        var b= await this.userModel.findOne({email:data}).exec()
-        console.log("tên người đang truy cập  "+userOwn.userName )
-        console.log("người đã yêu cầu kết bạn "+a.userName)
         
-        if(a!=null||b!=null){
-          console.log("có người dùng.....")
-          const find = a!=null ? 0:1
-          console.log(find)
-          let user = a!=null?a.toObject():b.toObject()
-          
-          //nhận lời mời
-          let friendConfirm=user.friendConfirm
-          for(let i=0;i<friendConfirm.length;i++){
-          
-            if(friendConfirm[i]==userOwn._id.toString())
-            return "had friendConfirm"
-          }
-          friendConfirm.push(userOwn._id.toString())
+          var b= await this.userModel.findOne({email:data}).exec()
+          console.log("tên người đang truy cập  "+userOwn.userName )
+         
+          if(a!=null||b!=null||c!=null){
+            console.log("có người dùng.....")
+            let find =5;
+            let user
+            if(a!=null){find = 0,user=a.toObject()};
+            if(b!=null){find = 1,user=b.toObject()};
+            if(c!=null){find = 2,user=c.toObject()};
 
-          // gửi lời mời đi
-          let friendRequest=userOwn.friendRequest
-          for(let i=0;i<friendRequest.length;i++){
-            if(friendRequest[i]==user._id.toString())
-            return "had friendRequest"
+
+            console.log(find)
+
+            console.log(user)
+            //nhận lời mời
+            let friendConfirm=user.friendConfirm
+            for(let i=0;i<friendConfirm.length;i++){
+            
+              if(friendConfirm[i]==userOwn._id.toString())
+              return "had friendConfirm"
+            }
+            friendConfirm.push(userOwn._id.toString())
+
+            // gửi lời mời đi
+            let friendRequest=userOwn.friendRequest
+            for(let i=0;i<friendRequest.length;i++){
+              if(friendRequest[i]==user._id.toString())
+              return "had friendRequest"
+            }
+            friendRequest.push(user._id.toString())
+            //bạn của chủ sở hữu
+            let friendOwn=userOwn.friend
+            for(let i=0;i<friendOwn.length;i++){
+              if(friendOwn[i]==user._id.toString())
+              return "had friend"
+            }
+            
+            console.log(friendConfirm)
+            console.log(friendRequest)
+            await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friendRequest:friendRequest})
+            
+            if(find==0){
+              await this.userModel.findOneAndUpdate({userName:data},{friendConfirm:friendConfirm})
+            }
+            if(find==1){
+              await this.userModel.findOneAndUpdate({email:data},{friendConfirm:friendConfirm})
+            }
+            if(find==2){
+              await this.userModel.findOneAndUpdate({_id:data},{friendConfirm:friendConfirm})
+            }
+            return user._id
           }
-          friendRequest.push(user._id.toString())
-          //bạn của chủ sở hữu
-          let friendOwn=userOwn.friend
-          for(let i=0;i<friendOwn.length;i++){
-            if(friendOwn[i]==user._id.toString())
-            return "had friend"
+          else{
+            return "error"
           }
-          
-          console.log(friendConfirm)
-          console.log(friendRequest)
-          await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friendRequest:friendRequest})
-          
-          if(find==0){
-            await this.userModel.findOneAndUpdate({userName:data},{friendConfirm:friendConfirm})
-          }else{
-            await this.userModel.findOneAndUpdate({email:data},{friendConfirm:friendConfirm})
-          }
-          return user._id
-        }
-        else{
-          return "had not user"
-        }
         }catch(err){
           return "error"
         }
         // this.server.emit('test'," test ");
       }
-      async addFrConfirm(userOwn,id:string) : Promise<String>{
+      async addFrConfirm(userOwn,id:string) : Promise<any>{
         try{
           var a =await this.userModel.findOne({_id:id})
           console.log("tên người đang truy cập  "+userOwn.userName )
@@ -324,10 +344,10 @@ export class UserService {
             if(isRequest==true&&isConfirm==true){
               await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friendConfirm:friendConfirm,friend:friendOwn})
               await this.userModel.findOneAndUpdate({_id:id},{friendRequest:friendRequest,friend:friend1})
-              return "done"
+              return user;
             }
             return "error"
-          }else{return "had not user"}
+          }else{return "error"}
         }catch(e){return "error"}
         // this.server.emit('test'," test ");
         
@@ -370,7 +390,7 @@ export class UserService {
               await this.userModel.findOneAndUpdate({_id:userOwn._id.toString()},{friend:friendOwn})
                 await this.userModel.findOneAndUpdate({_id:id},{friend:friend1})
               return "done"
-            }else{return "error"}
+            }else{return "not friend"}
             
           }else{return "error"}
         }catch(e){return "error"}
@@ -498,6 +518,47 @@ export class UserService {
           }
         }
         catch(e){return "error"}
+      }
+      /// ------- get all fr-------------------------------------------------------------
+      async getallFrAvatar(listFr:string[]){
+        try{
+          let listAvatarFr={}
+          for(let i=0;i<listFr.length;i++){
+            if(listFr[i]!=null){ 
+              let result=await this.userModel.findOne({_id:listFr[i]})
+              if(result!=null){
+                let  avatar = "";
+                if(result.avatarImg == []||result.avatarImg==undefined||result.avatarImg==null){
+                   avatar="avatarNull.jpg"
+                }else{avatar=result.avatarImg.pop();}
+                
+                const realName=result.realName
+                const id=result._id.toString();
+                const data= [avatar,realName,id]
+                listAvatarFr[listFr[i]]=data
+              }
+            } 
+          }
+          return listAvatarFr;
+        }catch(e){return "error"}
+      }
+      //---------------------------show messsages Fr------------
+      // async getAllMesssageFr(listFr:string[],limit:number,offset:number,sourceId,targetId){
+      //   try{
+      //     for(let i=0;i<=listFr.length;i++){
+      //       let result = await this.messageService.findLimit(limit,offset,sourceId,targetId);
+      //       if(result != null){
+      //         console.log(result)
+      //         return result
+      //       }
+      //     }
+      //   }catch(e){
+      //     return "error"
+      //   }
+      // }
+      async test1(id){
+        var a= await this.userModel.findOne({_id:id})
+        return a
       }
       
 }

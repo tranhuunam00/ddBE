@@ -45,7 +45,6 @@ export class FeedService {
         try {var a= await this.feedModel.find({sourceUserId:sourceId}).skip(offset).limit(limit).sort({createdAt:-1}).exec();
          console.log(a)
             return a
-           
         }
         catch (err) { return []};
     }   

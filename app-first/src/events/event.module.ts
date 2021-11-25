@@ -9,25 +9,13 @@ import { UserModule } from '../user/user.module';
 
 @Global()
 @Module({
-  imports:[UserModule,
+  imports:[
     DatabaseModule,MessageModule,
-    JwtModule.register({
-    secret: "secretKey",
-    signOptions: { expiresIn: '500s' },
-    }),
+    
     ],
     providers: [EventsGateway],
     exports: [EventsGateway]
   })
 export class EventsModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-    .apply(JwtMiddleware)
-    .exclude(
-      // { path: 'cats', method: RequestMethod.GET },
-      // { path: 'cats', method: RequestMethod.POST },
-      // 'cats/(.*)',
-    )
-    .forRoutes(EventsGateway);
-  }
+  
 }

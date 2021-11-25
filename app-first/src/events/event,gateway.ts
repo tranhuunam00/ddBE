@@ -4,16 +4,14 @@ import {
     SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
-    WsResponse,
+
   } from '@nestjs/websockets';
-  import { from, Observable } from 'rxjs';
-  import { map } from 'rxjs/operators';
+
   import { Server,Socket  } from 'socket.io';
   import { MessageService } from '../message/message.service';
-  import { CreateMessageDto } from '../message/dto/message.dto';
+
   import { Session } from '@nestjs/common';
-  import { MiddlewareBuilder } from '@nestjs/core';
-import { Console } from 'console';
+
 
 
   var clients={};

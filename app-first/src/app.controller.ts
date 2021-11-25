@@ -36,10 +36,12 @@ export class AppController {
 
     return "hihi";
   }
-  // @Get("/:id")
-  // async findOne(@Param('id', ParseIntPipe) id: number) {
-  //   return id;
-  // }
+  @Get("/:id")
+  async findOne(@Param() params) {
+    
+    console.log(params.id);
+    return "hey"
+  }
   
 }
 

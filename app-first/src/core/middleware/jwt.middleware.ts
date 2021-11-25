@@ -1,9 +1,9 @@
 
-import { BadRequestException, Injectable, NestMiddleware, Req, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Global, Injectable, NestMiddleware, Req, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../user/user.service';
-
+@Global()
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService,private userService: UserService) {}

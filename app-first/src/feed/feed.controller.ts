@@ -39,7 +39,7 @@ export class FeedController {
     async create(@Body()   createFeedDto :CreateFeedDto, @Req() req :Request,@Res() res :Response,
     @Session() session: Record<string, any>) { 
         try {
-            console.log("chajyy create feed-------------")
+            console.log("----chajyy create feed-------------")
             console.log(createFeedDto.sourceUserId)
             console.log(req.user["_id"].toString())
             if(createFeedDto.sourceUserId==req.user["_id"].toString()){
@@ -63,9 +63,10 @@ export class FeedController {
     @Get("limitFeedOwn")
     @UsePipes(new ValidationPipe({ transform: true }))
     async getFeedLimit(@Query() filerFeedDto: FilterFeedDto,@Res() res: Response,@Req() req: Request){
+        console.log("limitFeedOwn")
         console.log(req.user["_id"].toString())
         const {limit,offset,startedAt,endedAt,sourceId}=filerFeedDto;
-        var a = await this.feedService.findLimit(limit,offset,req.user["_id"].toString())
+        var a = await this.feedService.findLimit(limit,offset,sourceId)
         return res.json(a);
     }
     //----------------------------get feed -----------

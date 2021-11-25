@@ -12,8 +12,9 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MailModule } from '../mail/mail.module';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { EventsModule } from '../events/event.module';
+import { MessageModule } from '../message/message.module';
 
-
+@Global()
 @Module({
   imports: [TypeOrmModule.forFeature([UserSql]),DatabaseModule,
   MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
@@ -21,7 +22,7 @@ import { EventsModule } from '../events/event.module';
     secret: "secretKey",
     signOptions: { expiresIn: '500s' },
   }),
-  
+  MessageModule,
   MailModule
   ],
   controllers: [UserController],

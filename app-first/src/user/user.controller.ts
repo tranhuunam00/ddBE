@@ -3,14 +3,16 @@ import { UserService } from './user.service';
 import { UserI } from './interfaces/user.interface';
 import { BaseUserDto, CreateUserDto, UpdateUserDto, CreateUserComfirmDto } from './dto/user.dto';
 
-import { Request } from 'express';
+import { Request, Response,} from 'express';
 import { RolesGuard } from '../core/guard/user.guard';
 import { LoggingInterceptor } from 'src/core/interceptor/logger';
 import { User } from './scheme/user.schema';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+
 import { FilterMessageDto } from '../message/dto/message_param.dto';
 import { FileService } from '../file/file.service';
+import { MessageService } from '../message/message.service';
+
 
 
 
@@ -19,14 +21,15 @@ import { FileService } from '../file/file.service';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService ,
-     private jwtService: JwtService,
-
+      private jwtService: JwtService,
+     
      ) {}
   //........................update Pw...............................
   @Put('/updatePassword')
   async updatePassword(@Req() req: Request,@Body() body:{password:string}){
     await this.userService.updatePassword(req.user["userName"],body.password)
   }
+  
   // lấy thông tin qua jwt có header là cookie jwt
   @Get("userJwt")
   async getUserJwt(@Req() request: Request,@Res() res: Response) {
@@ -51,7 +54,7 @@ export class UserController {
     return "logout"
   } 
   //-------------------addfr---------------------------------------
- 
+  
   @Get("addfr/:data")
   @UsePipes(new ValidationPipe({ transform: true }))
   async addFr(@Res ({ passthrough: true }) response: Response,
@@ -59,9 +62,10 @@ export class UserController {
   @Req() request :Request ,@Session() session: Record<string, any>){
     console.log(request.user)
     let user=request.user;
+    console.log("data là")
     console.log(data)
     let result = await this.userService.addFr(request.user,data)
-    
+    console.log(result)
     response.json(result)
   } 
   @Get("addfrConfirm/:id")
@@ -87,7 +91,7 @@ export class UserController {
     console.log(id)
     let result = await this.userService.removeFriend(request.user,id)
     if(result !="error"){ response.json(result) }
-    else{ response.json("not") }
+    else{ response.json("error") }
   } 
 
   @Get("removeFrRequest/:id")
@@ -102,18 +106,67 @@ export class UserController {
     response.json(result) 
     
   } 
-  
-
-  //--------------------change avatar or ảnh bìa----------
-  
-  @Get()
-  async index() {
-    return await this.userService.findAll();
+  @Get("removeFrConfirm/:id")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async removeFrConfirm(@Res ({ passthrough: true }) response: Response,
+  @Param("id") id: string,
+  @Req() request :Request ,@Session() session: Record<string, any>){
+    console.log(request.user)
+    let user=request.user;
+    console.log(id)
+    let result = await this.userService.removeFrConfirm(request.user,id)
+    response.json(result) 
+    
+  } 
+  @Get("test/:id")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async test(@Res() response: Response,@Param() params){
+    console.log(params.id)
+    let a = await this.userService.test1(params.id);
+    console.log("a la : ")
+    console.log(a)
+    response.json(a)
   }
+  
+  //--------------------get avatar Fr----------
+  @Get("allAvatarFr/:id")
+  async getAllFrAvatar(@Req() req: Request,@Res() res: Response,@Param() params){
+    try{
+      let user=await this.userService.findById(params.id);
+      if(user!={}){
+        console.log(user["friend"])
+        let result = await this.userService.getallFrAvatar(user["friend"])
+        console.log(result)
+        if(result == "error"){return res.json("error")}
+        else{return res.json(result)}
+      }else{
+        return res.json("error")
+      }
+      
+      
+    }catch(err){return res.json("error")}
+  }
+  //-----------------------get information Hadchat-------
+  @Get("allInforHadChat")
+  async getAllHadChat(@Req() req: Request,@Res() res: Response){
+    try{
+      
+      let result = await this.userService.getallFrAvatar(req.user["hadMessageList"])
+      console.log(result)
+      if(result == "error"){return res.json("error")}
+      else{return res.json(result)}
+      
+    }catch(err){return res.json("error")}
+  }
+  
 
   @Get(':id')
   async find(@Param('id') id: string) {
-    return await this.userService.findOne(id);
+    console.log(id)
+    
+    let result= await this.userService.findById(id);
+    console.log(result)
+    return result;
   }
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
