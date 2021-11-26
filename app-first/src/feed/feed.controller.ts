@@ -49,9 +49,11 @@ export class FeedController {
                 console.log(createFeedDto)
                 const result= await this.feedService.create(createFeedDto);
                 if(result!="error"&&result!=undefined){
-                    console.log(result);
-                    this.eventsGateway.createNewFeed("post rat oki",[ownId])
-                     res.json(result)
+                   
+                    console.log("gửi đến tất cả bạn bè này")
+                    console.log(req.user["friend"])
+                    this.eventsGateway.createNewFeed({feedId:result,...createFeedDto},req.user["friend"])
+                    res.json(result)
                 }
                 else{ res.json("error")}
             }
@@ -67,6 +69,8 @@ export class FeedController {
         console.log(req.user["_id"].toString())
         const {limit,offset,startedAt,endedAt,sourceId}=filerFeedDto;
         var a = await this.feedService.findLimit(limit,offset,sourceId)
+        console.log("kết quả của feed limit l à ")
+        console.log(a)
         return res.json(a);
     }
     //----------------------------get feed -----------

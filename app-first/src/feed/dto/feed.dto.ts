@@ -1,4 +1,5 @@
 import { IsArray, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { BaseCommentDto } from "./comment";
 
 export class BaseFeedDto {
   @IsString()
@@ -9,6 +10,10 @@ export class BaseFeedDto {
     sourceUserId:string
   @IsArray()
     rule:string[]
+  @IsArray()
+    comment:BaseCommentDto[]
+  @IsArray()
+    like:string[]
   @IsString()
     createdAt:string
   @IsString()

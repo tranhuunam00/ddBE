@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { BaseCommentDto } from '../dto/comment';
 
 export type FeedDocument = Feed & Document;
 
@@ -12,6 +13,9 @@ export class Feed {
   sourceUserId:string;
   @Prop()
   like:string[];
+  @Prop()
+  comment:BaseCommentDto[];
+  
   @Prop()
   sourceUserName:string;
   @Prop()

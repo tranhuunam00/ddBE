@@ -36,12 +36,7 @@ export class AppController {
 
     return "hihi";
   }
-  @Get("/:id")
-  async findOne(@Param() params) {
-    
-    console.log(params.id);
-    return "hey"
-  }
+  
   
 }
 

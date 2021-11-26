@@ -43,8 +43,10 @@ export class FeedService {
     }   
     async findLimit(limit:number,offset:number,sourceId:string):Promise<BaseFeedDto[]>{
         try {var a= await this.feedModel.find({sourceUserId:sourceId}).skip(offset).limit(limit).sort({createdAt:-1}).exec();
-         console.log(a)
+         if(a!=null){
             return a
+         }
+            
         }
         catch (err) { return []};
     }   

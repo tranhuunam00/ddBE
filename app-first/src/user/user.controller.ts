@@ -92,7 +92,7 @@ export class UserController {
     let result = await this.userService.removeFriend(request.user,id)
     if(result !="error"){ response.json(result) }
     else{ response.json("error") }
-  } 
+  }
 
   @Get("removeFrRequest/:id")
   @UsePipes(new ValidationPipe({ transform: true }))

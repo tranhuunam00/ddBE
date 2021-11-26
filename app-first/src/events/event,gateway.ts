@@ -4,16 +4,11 @@ import {
     SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
-
   } from '@nestjs/websockets';
-
   import { Server,Socket  } from 'socket.io';
   import { MessageService } from '../message/message.service';
-
   import { Session } from '@nestjs/common';
-
-
-
+  //
   var clients={};
   @WebSocketGateway()
   export class EventsGateway {
@@ -68,6 +63,7 @@ import {
         console.log(data);
         for(let i=0;i<listFr.length;i++){
           if(listFr[i] in clients){
+              console.log(listFr[i]);
               console.log("--da emit-------")
               clients[listFr[i]].emit("test",data)}
         }
