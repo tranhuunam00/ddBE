@@ -4,6 +4,7 @@ import { BaseFeedDto, CreateFeedDto } from './dto/feed.dto';
 
 import { Feed, FeedDocument } from './scheme/feed.schema';
 import { UserService } from '../user/user.service';
+import { BaseCommentDto } from './dto/comment';
 
 @Injectable()
 export class FeedService {
@@ -99,5 +100,92 @@ export class FeedService {
             
         }catch(e){return "error"}
        
+    }
+    ///comment
+    async createComment(feedId:string,comment : BaseCommentDto){
+        try{
+            let result = await this.feedModel.findOne({_id: feedId})
+            if(result!=null){
+                console.log("có bài viết này--------")
+                const feed=result.toObject()
+                let listComment =feed.comment;
+                listComment.push(comment)
+                console.log(listComment)
+                await this.feedModel.findOneAndUpdate({_id:feedId},{comment:listComment}).exec()
+                return "done"
+                
+            }else{return "error"}
+        }catch(e){return "error"}
+    }//get commnet
+    async getComment(feedId:string){
+        try{
+            let result = await this.feedModel.findOne({_id: feedId})
+            if(result!=null){
+                console.log("có bài viết này--------")
+                const feed=result.toObject()
+                let listComment =feed.comment;
+                return listComment
+                
+            }else{return "error"}
+
+        }catch(e){return "error"}
+    }
+    //
+    async updateComment(feedId:string,comment : BaseCommentDto,newMessage:string,newPathImg:string){
+        try{
+            let result = await this.feedModel.findOne({_id: feedId})
+            if(result!=null){
+                console.log("có bài viết này--------")
+                const feed=result.toObject()
+                let isCmt=false
+                let index=-1;
+                let listComment =feed.comment;
+                for(let i=0;i<listComment.length;i++){
+                    if(listComment[i].createdAt==comment.createdAt&&listComment[i].messages==comment.messages
+                        &&listComment[i].pathImg==comment.pathImg&&listComment[i].sourceUserId==comment.sourceUserId){
+                        index=i
+                        isCmt=true
+                    }
+                }
+                console.log(index)
+                if(index!=-1){
+                    listComment[index].messages=newMessage,
+                    listComment[index].pathImg=newPathImg,
+                    await this.feedModel.findOneAndUpdate({_id:feedId},{comment:listComment}).exec()
+
+                }else{return "error"}
+                
+                return "done"
+                
+            }else{return "error"}
+        }catch(e){return "error"}
+    }
+    async deleteComment(feedId:string,comment :BaseCommentDto){
+        try{
+            let result = await this.feedModel.findOne({_id: feedId})
+            if(result!=null){
+                console.log("có bài viết này--------")
+                const feed=result.toObject()
+                let isCmt=false
+                let index=-1;
+                let listComment =feed.comment;
+                for(let i=0;i<listComment.length;i++){
+                    if(listComment[i].createdAt==comment.createdAt&&listComment[i].messages==comment.messages
+                        &&listComment[i].pathImg==comment.pathImg&&listComment[i].sourceUserId==comment.sourceUserId){
+                        index=i
+                        isCmt=true
+                    }
+                }
+                console.log(index)
+                if(index!=-1){
+                    listComment.splice(index,1)
+                    await this.feedModel.findOneAndUpdate({_id:feedId},{comment:listComment}).exec()
+
+                }else{return "error"}
+                
+                return "done"
+                
+            }else{return "error"}
+        }catch(e){return "error"}
     }
 }

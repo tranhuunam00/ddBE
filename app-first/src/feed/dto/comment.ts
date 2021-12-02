@@ -9,7 +9,6 @@ export class BaseCommentDto {
     sourceUserId:string
   @IsString()
     createdAt:string
-  @IsString()
-    sourceUserName:string
+ 
 }
 //

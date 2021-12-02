@@ -6,9 +6,12 @@ import { DatabaseModule } from '../database/database.module';
 import { UserModule } from '../user/user.module';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { JwtModule } from '@nestjs/jwt';
+import { FeedModule } from '../feed/feed.module';
 
 @Module({
-  imports: [MessageModule,DatabaseModule,UserModule,JwtModule.register({
+  imports: [MessageModule,
+    FeedModule,
+    DatabaseModule,UserModule,JwtModule.register({
     secret: "secretKey",
     signOptions: { expiresIn: '500s' },
   }),],

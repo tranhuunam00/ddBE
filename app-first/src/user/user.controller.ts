@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { FilterMessageDto } from '../message/dto/message_param.dto';
 import { FileService } from '../file/file.service';
 import { MessageService } from '../message/message.service';
+import { IsNotEmpty } from 'class-validator';
 
 
 
@@ -118,6 +119,8 @@ export class UserController {
     response.json(result) 
     
   } 
+
+
   @Get("test/:id")
   @UsePipes(new ValidationPipe({ transform: true }))
   async test(@Res() response: Response,@Param() params){
@@ -168,6 +171,32 @@ export class UserController {
     console.log(result)
     return result;
   }
+
+  
+  @Post("listUser")
+    async GetListUser(@Req() req: Request,@Res() res: Response){
+      console.log("--hàm get user list --------đang chạy")
+      console.log(req.body.listUser)
+      let users=[]
+      if(req.body.listUser!=undefined){
+        for(let i=0;i<req.body.listUser.length;i++){
+          const user= await this.userService.findById(req.body.listUser[i])
+          console.log(user)
+          if(user["userName"]!=undefined){
+            users.push(user)
+
+          }
+        }
+        console.log("------length")
+        console.log(users.length)
+        if(users.length>0){
+          return res.json(users)
+        }else{return res.json("error")}
+        
+      }else{return res.json("error")}
+    }
+  
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(id, updateUserDto);

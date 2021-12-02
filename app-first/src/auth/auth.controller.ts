@@ -51,7 +51,7 @@ export class AuthController {
       response.cookie("jwt",jwt,{httpOnly:true});
       return jwt;
     }
-    else {return ""}
+    else {return "error"}
   }
   //...........................................................................
   @Post("/forgotPassword")

@@ -10,12 +10,15 @@ import { MessageModule } from '../message/message.module';
 import { MessageService } from '../message/message.service';
 import { createWriteStream } from 'fs';
 import { UserService } from '../user/user.service';
+import { FeedService } from '../feed/feed.service';
+
 
 
 @Controller('file')
 export class FileController {
     constructor(private readonly messageService: MessageService,
-        private userService: UserService
+        private userService: UserService,
+        private feedService: FeedService
         ){}
     @Post("img/upload")
     @UseInterceptors(
@@ -54,13 +57,25 @@ export class FileController {
                     }else{
                         return res.json("error")
                     }
-                }else{
-                    if(req.body.eventChangeImgUser=="message"){
-                        let a:string[] = file.path.split("\\");
-                        let pathImg = a[2];
-                        return res.json(pathImg);
-                    }else{return res.json("error")
-                }} 
+                }
+                if(req.body.eventChangeImgUser=="message"){
+                    let a:string[] = file.path.split("\\");
+                    let pathImg = a[2];
+                    return res.json(pathImg);
+                }
+                if(req.body.eventChangeImgUser=="comment"){
+                    let a:string[] = file.path.split("\\");
+                    let pathImg = a[2];
+                    let result= await this.feedService.createComment(req.body.feedId,  {
+                        "pathImg": pathImg,
+                        "messages":"",
+                        "sourceUserId": req.user["_id"].toString(),
+                        "createdAt": req.body.createdAt,
+                      
+                      })
+                      if(result=="done"){ return res.json(pathImg);}
+                    else{return res.json("error")}
+                }
                 
             }else{return res.json("error")}
 

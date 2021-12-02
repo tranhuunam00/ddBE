@@ -40,7 +40,7 @@ import {
         if(clients[data.targetId]!=null){
           clients[data.targetId].emit("message",data);
         }
-        this.messageService.create({...data})
+        await this.messageService.create({...data})
     }
     //------------------------create feed --------------
     @SubscribeMessage('postFeedServer')
@@ -53,6 +53,9 @@ import {
           clients[feedUserId].emit("likeFeed",data)
         }
     }
+
+    /////----------------------comment---------------
+    
     @SubscribeMessage('test')
       test(@MessageBody() data: any) {
         console.log(data);
