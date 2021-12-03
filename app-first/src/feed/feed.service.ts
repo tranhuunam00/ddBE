@@ -56,7 +56,7 @@ export class FeedService {
         try{
             const a= await this.userService.findById(sourceId);
             const b= await this.feedModel.findOne({_id:feedId});
-            if(a!=null&&b!=null){
+            if(a!=null||b!=null){
                 let listLike=b.like
                 let isHad=false;
                 console.log(b)

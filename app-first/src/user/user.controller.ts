@@ -195,7 +195,19 @@ export class UserController {
         
       }else{return res.json("error")}
     }
-  
+
+  @Post("setting")
+  async settingUser(@Res() res: Response,@Req() req,@Param() params
+   ,@Body() data:{sex:string,addressTinh:string,addressDetails:string,birthDate:string,realName:string,}){
+    console.log("data nhận vào");
+    console.log(req.user["_id"])
+    console.log(data)
+    let result =await this.userService.setting(data,req.user["_id"]);
+    if(result!="error"){
+      res.json("done");
+    }else{return res.json("error")}
+   
+  }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

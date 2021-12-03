@@ -13,6 +13,8 @@ export class Token {
   isLogin:boolean;
   @Prop()
   createdAt:string;
+  @Prop()
+  userName:string;
   
 }
 

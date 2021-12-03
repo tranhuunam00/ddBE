@@ -35,7 +35,7 @@ export class UserService {
       @WebSocketServer()
       server: Server
       //......................................đăng kí.....................................
-      async register(data:CreateUserDto){
+      async register(data){
         if(data.userName.length<6) {return null}
         if(data.password.length<6) {return null}
         const userMongo =await this.userModel.findOne({userName:data.userName}).exec(); 
@@ -63,7 +63,7 @@ export class UserService {
             let newUser=
                     new this.userModel({
                       ...data,
-                      createdAt: new Date(),
+                      createdAt: (new Date()).toString(),
                     })
             await newUser.save()
       }
@@ -159,6 +159,7 @@ export class UserService {
                 let newToken=
                 new this.tokenModel({
                   Token: jwt,
+                  userName:data.userName,
                   createdAt: new Date(),
                   isLogin:true
                 })
@@ -194,7 +195,13 @@ export class UserService {
       async updatePassword(userName: string,password: string){
         const hashedPassword = await bcrypt.hash(password,12);
         await this.userModel.findOneAndUpdate({userName:userName},{password:hashedPassword})
-        
+        await this.deleteJwt(userName)
+      }
+      //-----xóa jwt khi đang dùng
+      async deleteJwt(userName:string){
+        var result = await this.tokenModel.findOneAndDelete({userName:userName}).sort({createdAt:-1})
+        console.log("kết quả khi tìm kiếm jwt là")
+        console.log(result)
       }
       //.........................................update..........................
       async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -560,5 +567,17 @@ export class UserService {
         var a= await this.userModel.findOne({_id:id})
         return a
       }
-      
+      //-------------------setting -----------------------
+      async setting(data:{sex:string,addressTinh:string,addressDetails:string,birthDate:string,realName:string},id:string){
+        
+        try{
+          const result = await this.userModel.findOneAndUpdate({_id:id},
+            {realName:data.realName,sex:data.sex,addressTinh:data.addressTinh,addressDetails:data.addressDetails,birthDate:data.birthDate});
+          console.log("kết quả khi setting");
+          console.log(result)
+          if(result!= null){
+            return result;
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
 }

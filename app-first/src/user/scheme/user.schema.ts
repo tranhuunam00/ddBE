@@ -13,7 +13,17 @@ export class User {
   @Prop()
   realName: string;
   @Prop()
+  addressTinh: string;
+  @Prop()
+  addressDetails: string;
+  @Prop()
+  sex: string;
+  @Prop()
+  birthDate: string;
+  @Prop()
   password:string
+  @Prop()
+  createdAt:string
   @Prop()
   avatarImg: string[];
   @Prop()

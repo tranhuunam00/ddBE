@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res, Session } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, Session ,Get ,Param} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { CreateUserDto, CreateUserComfirmDto, BaseUserDto } from '../user/dto/user.dto';
 import { Request, Response } from 'express';
@@ -23,7 +23,8 @@ export class AuthController {
  
   //................................................
   @Post('/registerConfirm')
-  async confirm(@Body()   data: CreateUserComfirmDto, @Req() request :Request ,@Session() session: Record<string, any >,@Res() res) :Promise<String> {
+  async confirm(@Body()   data, @Req() request :Request ,@Session() session: Record<string, any >,@Res() res) :Promise<String> {
+    console.log("data đã nhận đc khi đăng kí là----")
     console.log(data)
     console.log(session[data.userName])
     console.log(a[data.userName])
@@ -103,5 +104,11 @@ export class AuthController {
        res.json("done")
     }else{ res.json("error")}
    
+  }
+
+  @Get("test/:userName")
+  async test(@Param() params,@Res() res){
+    console.log(params.userName)
+    await this.userService.deleteJwt(params.userName)
   }
 }
