@@ -15,7 +15,6 @@ export class Notifi {
   sourceUserId:string;
   @Prop()
   content: string;
-  
 }
 
 export const NotifiSchema = SchemaFactory.createForClass(Notifi);

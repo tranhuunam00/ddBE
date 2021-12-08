@@ -12,7 +12,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [DatabaseModule,MongooseModule.forFeature([{name:Message.name,schema:MessageSchema}]),
-
+  UserModule,
   JwtModule.register({
     secret: "secretKey",
     signOptions: { expiresIn: '500s' },

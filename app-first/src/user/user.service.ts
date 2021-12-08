@@ -26,8 +26,8 @@ import { MessageService } from '../message/message.service';
 export class UserService {
   constructor( @Inject("USER_MODEL")  private userModel:Model<UserDocument> ,
   @Inject("TOKEN_MODEL") private tokenModel:Model<TokenDocument>,
-  @InjectRepository(UserSql)
-  private usersRepository: Repository<UserSql>,
+  // @InjectRepository(UserSql)
+  // private usersRepository: Repository<UserSql>,
   private jwtService: JwtService,
   private mailService: MailService,
  
@@ -94,9 +94,9 @@ export class UserService {
       }
       
       //sql.......................................
-      findAllSql(): Promise<UserSql[]> {
-        return this.usersRepository.find();
-      }
+      // findAllSql(): Promise<UserSql[]> {
+      //   return this.usersRepository.find();
+      // }
       //............................................
       async findAll(): Promise<User[]> {
         return await this.userModel.find({}).exec();
@@ -111,6 +111,15 @@ export class UserService {
           
         }catch(e){return {}}
         
+      }
+      //---tim bằng email---------
+      async findByEmail(email:string){
+        try{
+          let user= await this.userModel.findOne({ email:email }).exec();
+          if(user!=null){
+            
+          }
+        }catch(e){return "error"}
       }
       
       //.....................................login..........................................
@@ -577,6 +586,26 @@ export class UserService {
           console.log(result)
           if(result!= null){
             return result;
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
+      //---------------create new user chat-----------------
+      async newHadUserChat(idFr:string,id: string,listHadMsgUser:string[]){
+        try{
+          let result = await this.userModel.findOne({_id:idFr})
+          if(result!=null){
+            if(listHadMsgUser.indexOf(idFr)<0){
+              let listHadMsgFr = result.hadMessageList;
+              listHadMsgFr.push(id);
+              listHadMsgUser.push(idFr);
+              let resultAll = await Promise.all([this.userModel.findByIdAndUpdate({_id:id},{hadMessageList:listHadMsgUser}),
+                this.userModel.findByIdAndUpdate({_id:idFr},{hadMessageList:listHadMsgFr})]);
+              
+              if(resultAll[0]!=null&&resultAll[1]!=null){
+                return "done"
+              }else{return "error"}
+            }else{return "error"}
+            
           }else{return "error"}
         }catch(e){return "error"}
       }

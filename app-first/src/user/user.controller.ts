@@ -208,7 +208,12 @@ export class UserController {
     }else{return res.json("error")}
    
   }
-
+  //------------------
+  @Post("createHadMsg")
+  async createHadMsg(@Res() res:Response,@Req() req:Request,@Body() frId:string){
+    let result = await this.userService.newHadUserChat(frId,req.user["id"],req.user["hadMessageList"])
+    return result
+  }
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(id, updateUserDto);

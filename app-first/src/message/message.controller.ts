@@ -5,10 +5,12 @@ import { FilterMessageDto } from './dto/message_param.dto';
 import { MessageService } from './message.service';
 import { Message } from './scheme/message.schema';
 import { AllMsgFrI } from './interFace/msgListFr';
+import { UserService } from '../user/user.service';
 
 @Controller('message')
 export class MessageController {
-    constructor(private readonly messageService: MessageService) {}
+    constructor(private readonly messageService: MessageService,
+        private userService:UserService) {}
    
     @Get()
     async findAll() :Promise<Message[]>{
@@ -18,6 +20,7 @@ export class MessageController {
     @Post("")
     async create(@Body()   createMessageDto :CreateMessageDto, @Req() req){
         console.log(createMessageDto)
+        
         return await this.messageService.create(createMessageDto);
     }
 

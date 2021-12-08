@@ -17,23 +17,25 @@ import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
+import { NotificationModule } from './notification/notification.module';
 
 
 
 @Module({
   imports: [UserModule,PhotosModule,
-    TypeOrmModule.forRootAsync({
-      useFactory: async () =>
-        Object.assign(await getConnectionOptions(), {
-          autoLoadEntities: true,
-        }),
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   useFactory: async () =>
+    //     Object.assign(await getConnectionOptions(), {
+    //       autoLoadEntities: true,
+    //     }),
+    // }),
     MongooseModule.forRoot('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',{
     autoCreate:true,
   }),
     AuthModule,
     PhotosModule,
     MessageModule,
+    NotificationModule,
     FileModule,
     FeedModule,
     ConfigModule.forRoot({

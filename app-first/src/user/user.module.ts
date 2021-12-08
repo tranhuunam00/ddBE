@@ -16,13 +16,14 @@ import { MessageModule } from '../message/message.module';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([UserSql]),DatabaseModule,
+  imports: [
+    // TypeOrmModule.forFeature([UserSql]),DatabaseModule,
   MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
   JwtModule.register({
     secret: "secretKey",
     signOptions: { expiresIn: '500s' },
   }),
-  MessageModule,
+  
   MailModule
   ],
   controllers: [UserController],
