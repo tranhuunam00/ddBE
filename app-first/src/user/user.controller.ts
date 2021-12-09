@@ -153,7 +153,7 @@ export class UserController {
   @Get("allInforHadChat")
   async getAllHadChat(@Req() req: Request,@Res() res: Response){
     try{
-      
+      console.log("chạy ")
       let result = await this.userService.getallFrAvatar(req.user["hadMessageList"])
       console.log(result)
       if(result == "error"){return res.json("error")}
@@ -162,11 +162,17 @@ export class UserController {
     }catch(err){return res.json("error")}
   }
   
+  @Get("email/:email")
+    async findByEmail(@Req() req: Request,@Res() res: Response,@Param("email") email: string){
+    console.log("chạy tim email")
+    console.log(email)
+    const result =await this.userService.findByEmail(email)
+    res.json(result)
+  }
 
   @Get(':id')
   async find(@Param('id') id: string) {
     console.log(id)
-    
     let result= await this.userService.findById(id);
     console.log(result)
     return result;
@@ -208,11 +214,12 @@ export class UserController {
     }else{return res.json("error")}
    
   }
-  //------------------
+  //------------------g
   @Post("createHadMsg")
-  async createHadMsg(@Res() res:Response,@Req() req:Request,@Body() frId:string){
-    let result = await this.userService.newHadUserChat(frId,req.user["id"],req.user["hadMessageList"])
-    return result
+  async createHadMsg(@Res() res:Response,@Req() req:Request,@Body() data:{frId:string}){
+    console.log("createHadMsg --new ")
+    let result = await this.userService.newHadUserChat(data.frId,req.user["_id"].toString(),req.user["hadMessageList"])
+    return res.json(result)
   }
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

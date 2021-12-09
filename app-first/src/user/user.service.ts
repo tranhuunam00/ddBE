@@ -115,10 +115,12 @@ export class UserService {
       //---tim bằng email---------
       async findByEmail(email:string){
         try{
-          let user= await this.userModel.findOne({ email:email }).exec();
-          if(user!=null){
-            
-          }
+          let userMongo= await this.userModel.findOne({ email:email }).exec();
+          if(userMongo!=null){
+            let user = userMongo.toObject();
+            const {password,...result}=user;
+            return result
+          }else{return "error"}
         }catch(e){return "error"}
       }
       
@@ -592,6 +594,9 @@ export class UserService {
       //---------------create new user chat-----------------
       async newHadUserChat(idFr:string,id: string,listHadMsgUser:string[]){
         try{
+          console.log("fr id là")
+          console.log(idFr)
+          console.log(id)
           let result = await this.userModel.findOne({_id:idFr})
           if(result!=null){
             if(listHadMsgUser.indexOf(idFr)<0){
