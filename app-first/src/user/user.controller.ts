@@ -13,6 +13,8 @@ import { FilterMessageDto } from '../message/dto/message_param.dto';
 import { FileService } from '../file/file.service';
 import { MessageService } from '../message/message.service';
 import { IsNotEmpty } from 'class-validator';
+import { EventsGateway } from '../events/event,gateway';
+import { NotificationService } from '../notification/notification.service';
 
 
 
@@ -23,7 +25,8 @@ import { IsNotEmpty } from 'class-validator';
 export class UserController {
   constructor(private readonly userService: UserService ,
       private jwtService: JwtService,
-     
+      private eventsGateway:EventsGateway,
+      private notifiService: NotificationService,
      ) {}
   //........................update Pw...............................
   @Put('/updatePassword')
@@ -56,58 +59,67 @@ export class UserController {
   } 
   //-------------------addfr---------------------------------------
   
-  @Get("addfr/:data")
+  @Post("addfr/:data")
   @UsePipes(new ValidationPipe({ transform: true }))
   async addFr(@Res ({ passthrough: true }) response: Response,
   @Param("data") data: string,
-  @Req() request :Request ,@Session() session: Record<string, any>){
+  @Req() request :Request , @Body() body:{createdAt:string}, @Session() session: Record<string, any>){
     console.log(request.user)
     let user=request.user;
     console.log("data là")
     console.log(data)
-    let result = await this.userService.addFr(request.user,data)
-    console.log(result)
-    response.json(result)
+    let result= await Promise.all([this.userService.addFr(request.user,data),
+      this.notifiService.create({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":data})])
+    await this.eventsGateway.handleFr({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":data},data)
+    console.log(result[0])
+    
+    response.json(result[0])
   } 
-  @Get("addfrConfirm/:id")
+  @Post("addfrConfirm/:id")
   @UsePipes(new ValidationPipe({ transform: true }))
   async addFrConfirm(@Res ({ passthrough: true }) response: Response,
-  @Param("id") id: string,
+  @Param("id") id: string,@Body() body:{createdAt:string},
   @Req() request :Request ,@Session() session: Record<string, any>){
     console.log(request.user)
     let user=request.user;
     console.log(id)
-    let result = await this.userService.addFrConfirm(request.user,id)
+    let result = await Promise.all([this.userService.addFrConfirm(request.user,id),
+      this.notifiService.create({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id})])
+      await this.eventsGateway.handleFr({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)
     
-     response.json(result) 
+     response.json(result[0]) 
   } 
 
-  @Get("removeFriend/:id")
+  @Post("removeFriend/:id")
   @UsePipes(new ValidationPipe({ transform: true }))
   async removeFriend(@Res ({ passthrough: true }) response: Response,
-  @Param("id") id: string,
+  @Param("id") id: string,@Body() body:{createdAt:string},
   @Req() request :Request ,@Session() session: Record<string, any>){
     console.log(request.user)
     let user=request.user;
     console.log(id)
-    let result = await this.userService.removeFriend(request.user,id)
-    if(result !="error"){ response.json(result) }
+    let result = await Promise.all([this.userService.removeFriend(request.user,id),
+       this.eventsGateway.handleFr({"type":"removeFriend","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+    
+    if(result[0] !="error"){ response.json(result) }
     else{ response.json("error") }
   }
 
-  @Get("removeFrRequest/:id")
+  @Post("removeFrRequest/:id")
   @UsePipes(new ValidationPipe({ transform: true }))
   async removeFrRequest(@Res ({ passthrough: true }) response: Response,
-  @Param("id") id: string,
+  @Param("id") id: string,@Body() body:{createdAt:string},
   @Req() request :Request ,@Session() session: Record<string, any>){
     console.log(request.user)
     let user=request.user;
     console.log(id)
-    let result = await this.userService.removeFrRequest(request.user,id)
-    response.json(result) 
+    let result = await Promise.all([this.userService.removeFrRequest(request.user,id),
+      this.eventsGateway.handleFr({"type":"removeFrRequest","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+
+    response.json(result[0]) 
     
   } 
-  @Get("removeFrConfirm/:id")
+  @Post("removeFrConfirm/:id")
   @UsePipes(new ValidationPipe({ transform: true }))
   async removeFrConfirm(@Res ({ passthrough: true }) response: Response,
   @Param("id") id: string,
@@ -115,8 +127,10 @@ export class UserController {
     console.log(request.user)
     let user=request.user;
     console.log(id)
-    let result = await this.userService.removeFrConfirm(request.user,id)
-    response.json(result) 
+    let result = await Promise.all([this.userService.removeFrConfirm(request.user,id),
+      this.eventsGateway.handleFr({"type":"removeFrConfirm","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+
+    response.json(result[0]) 
     
   } 
 

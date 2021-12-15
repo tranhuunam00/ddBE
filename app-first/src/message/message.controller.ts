@@ -6,10 +6,13 @@ import { MessageService } from './message.service';
 import { Message } from './scheme/message.schema';
 import { AllMsgFrI } from './interFace/msgListFr';
 import { UserService } from '../user/user.service';
+import { EventsGateway } from '../events/event,gateway';
 
 @Controller('message')
 export class MessageController {
     constructor(private readonly messageService: MessageService,
+        private eventsGateway:EventsGateway,
+
         private userService:UserService) {}
    
     @Get()
@@ -18,16 +21,16 @@ export class MessageController {
     }
 
     @Post("")
-    async create(@Body()   createMessageDto :CreateMessageDto, @Req() req){
+    async create(@Body()   createMessageDto :CreateMessageDto, @Req() req,@Res() res){
         console.log(createMessageDto)
-        
-        return await this.messageService.create(createMessageDto);
+        const result= await Promise.all([this.messageService.create(createMessageDto),
+        this.eventsGateway.emitClientMessage(createMessageDto)]) 
+        return res.json(result[0])
     }
 
 
     @Get("/individual") 
     @UsePipes(new ValidationPipe({ transform: true }))
-
     async findLimit( @Query() filerMessageDto: FilterMessageDto):Promise<Message[]>{
        const {limit,offset,startedAt,endedAt,sourceId,targetId}=filerMessageDto;
        console.log(limit)

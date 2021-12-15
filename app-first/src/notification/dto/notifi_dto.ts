@@ -10,5 +10,8 @@ export class BaseNotifiDto {
     readonly createdAt:string
  
     readonly sourceUserId:string
+
+    readonly targetUserId:string
+
 }
 //

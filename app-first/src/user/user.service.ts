@@ -261,17 +261,18 @@ export class UserService {
             console.log(user)
             //nhận lời mời
             let friendConfirm=user.friendConfirm
-            for(let i=0;i<friendConfirm.length;i++){
+            for(let i=0;i<userOwn.friendConfirm.length;i++){
             
-              if(friendConfirm[i]==userOwn._id.toString())
+              if(friendConfirm[i]==user._id.toString())
               return "had friendConfirm"
             }
+
             friendConfirm.push(userOwn._id.toString())
 
             // gửi lời mời đi
-            let friendRequest=userOwn.friendRequest
+            let friendRequest=user.friendRequest
             for(let i=0;i<friendRequest.length;i++){
-              if(friendRequest[i]==user._id.toString())
+              if(friendRequest[i]==userOwn._id.toString())
               return "had friendRequest"
             }
             friendRequest.push(user._id.toString())

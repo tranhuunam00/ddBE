@@ -8,12 +8,13 @@ import {
   import { Server,Socket  } from 'socket.io';
   import { MessageService } from '../message/message.service';
   import { Session } from '@nestjs/common';
+import { BaseNotifiDto } from '../notification/dto/notifi_dto';
   //
   var clients={};
   @WebSocketGateway()
   export class EventsGateway {
 
-    constructor(private messageService : MessageService){}
+    constructor(){}
 
     @WebSocketServer()
     server: Server;
@@ -29,19 +30,7 @@ import {
 
     
 
-    @SubscribeMessage('message')
-      async CreateMessage(@MessageBody() data: any) {
-        console.log(data)
-        console.log(data.message)
-        console.log("all server..............................online..............")
-        for(var i in clients) {
-          console.log(i);
-        }
-        if(clients[data.targetId]!=null){
-          clients[data.targetId].emit("message",data);
-        }
-        await this.messageService.create({...data})
-    }
+    
     //------------------------create feed --------------
     @SubscribeMessage('postFeedServer')
       async CreateFeed(@MessageBody() data: any) {
@@ -52,6 +41,21 @@ import {
         if(feedUserId in clients){
           clients[feedUserId].emit("likeFeed",data)
         }
+    }
+    //---------------gửi tin nhắn ----------------------------------------------------------------
+    async emitClientMessage (data){
+      if(clients[data.targetId]!=null){
+        console.log("có người dùng onl này nhé")
+        clients[data.targetId].emit("message",data);
+      }
+    }
+    // gửi lời mời kết bạn async
+    async handleFr(data :BaseNotifiDto, targetId){
+      if(targetId in clients){
+        if(clients[targetId]!=null){
+          clients[targetId].emit("handleFr",data)
+        }
+      }
     }
 
     /////----------------------comment---------------

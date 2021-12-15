@@ -10,9 +10,13 @@ export class Notifi {
   @Prop()
   type: string;
   @Prop()
+  isSeen: boolean;
+  @Prop()
   createdAt: string;
   @Prop()
   sourceUserId:string;
+  @Prop()
+  targetUserId:string
   @Prop()
   content: string;
 }

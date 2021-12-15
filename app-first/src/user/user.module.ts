@@ -13,6 +13,9 @@ import { MailModule } from '../mail/mail.module';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { EventsModule } from '../events/event.module';
 import { MessageModule } from '../message/message.module';
+import { EventsGateway } from '../events/event,gateway';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationModule } from '../notification/notification.module';
 
 @Global()
 @Module({
@@ -21,13 +24,13 @@ import { MessageModule } from '../message/message.module';
   MongooseModule.forFeature([{name:User.name,schema:UserSchema}]),
   JwtModule.register({
     secret: "secretKey",
-    signOptions: { expiresIn: '500s' },
+    signOptions: { expiresIn: '1000s' },
   }),
-  
+  NotificationModule,
   MailModule
   ],
   controllers: [UserController],
-  providers: [UserService,...usersProviders,...tokenProviders],
+  providers: [UserService,...usersProviders,...tokenProviders,EventsGateway],
   exports: [UserService]
 })
 export class UserModule {

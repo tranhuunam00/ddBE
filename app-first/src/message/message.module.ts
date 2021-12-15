@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module } from '@nestjs/common';
 
 import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
@@ -9,7 +9,8 @@ import { Message, MessageSchema } from './scheme/message.schema';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
-
+import { EventsGateway } from '../events/event,gateway';
+@Global()
 @Module({
   imports: [DatabaseModule,MongooseModule.forFeature([{name:Message.name,schema:MessageSchema}]),
   UserModule,
@@ -20,7 +21,7 @@ import { UserModule } from '../user/user.module';
   
   ],
   controllers: [MessageController],
-  providers: [MessageService,...messageProviders],
+  providers: [MessageService,...messageProviders,EventsGateway],
   exports:[MessageService]
 })
 export class MessageModule {

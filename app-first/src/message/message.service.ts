@@ -14,12 +14,15 @@ export class MessageService {
     }
     // tạo tin nhắn mới từ dữ liệu post lên và lưu vào data
     async create(data:CreateMessageDto){
-       
-        let newMessage=new this.messageModel({
+       try{ let newMessage=new this.messageModel({
                       ...data,
                       
                     })
-        return await  newMessage.save()
+            await  newMessage.save()
+            return "done"
+        }catch(err){return "error"}
+
+        
     }   
     //
     async findLimit(limit:number,offset:number,sourceId:string,targetId:string):Promise<Message[]>{

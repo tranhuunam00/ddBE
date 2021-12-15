@@ -2,9 +2,9 @@ import { IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class BaseMessageDto {
   @IsString()
-   path: string 
+    path: string 
   @IsString()
-   message:string
+    message:string
   @IsString()
     sourceId:string
   @IsString()

@@ -10,7 +10,7 @@ import { UserModule } from '../user/user.module';
 @Global()
 @Module({
   imports:[
-    DatabaseModule,MessageModule,
+    DatabaseModule,
     
     ],
     providers: [EventsGateway],

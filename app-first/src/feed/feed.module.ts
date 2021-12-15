@@ -19,7 +19,7 @@ import { MessageModule } from '../message/message.module';
   MessageModule,
   JwtModule.register({
     secret: "secretKey",
-    signOptions: { expiresIn: '500s' },
+    signOptions: { expiresIn: '1000s' },
   }),],
   controllers: [FeedController],
   providers: [FeedService,...FeedsProviders,EventsGateway],
