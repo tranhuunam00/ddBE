@@ -11,6 +11,7 @@ import { MessageService } from '../message/message.service';
 import { createWriteStream } from 'fs';
 import { UserService } from '../user/user.service';
 import { FeedService } from '../feed/feed.service';
+import { EventsGateway } from '../events/event,gateway';
 
 
 
@@ -18,7 +19,8 @@ import { FeedService } from '../feed/feed.service';
 export class FileController {
     constructor(private readonly messageService: MessageService,
         private userService: UserService,
-        private feedService: FeedService
+        private feedService: FeedService,
+        private eventsGateway:EventsGateway
         ){}
     @Post("img/upload")
     @UseInterceptors(
@@ -45,6 +47,8 @@ export class FileController {
         console.log(file)
         try{
             console.log("userOwn id " + req.user["_id"])
+          
+
             console.log( "body " + req.body.eventChangeImgUser)
             if(req.body.eventChangeImgUser != undefined && req.body.eventChangeImgUser != null){
                 if(req.body.eventChangeImgUser == "avatar" || req.body.eventChangeImgUser == "cover"){
@@ -61,6 +65,12 @@ export class FileController {
                 if(req.body.eventChangeImgUser=="message"){
                     let a:string[] = file.path.split("\\");
                     let pathImg = a[2];
+
+                   
+                    let result=await this.messageService.create({"path":pathImg,message:"","sourceId":req.user["_id"],
+                                                   "targetId":req.body.targetId,"time":req.body.time})
+                    this.eventsGateway.emitClientMessage({"path":pathImg,message:"","sourceId":req.user["_id"],
+                                                 "targetId":req.body.targetId,"time":req.body.time})
                     return res.json(pathImg);
                 }
                 if(req.body.eventChangeImgUser=="comment"){

@@ -9,14 +9,16 @@ import { AllMsgFrI } from './interFace/msgListFr';
 export class MessageService {
     constructor( @Inject("MESSAGE_MODEL")  private messageModel:Model<MessageDocument>){}
     //..........
-    findAllMessage(): Promise<Message[]> {
-        return this.messageModel.find().exec();
+    async findAllMessage(): Promise<Message[]> {
+        var result =await this.messageModel.find().exec();
+        console.log(result);
+        return result
     }
     // tạo tin nhắn mới từ dữ liệu post lên và lưu vào data
     async create(data:CreateMessageDto){
        try{ let newMessage=new this.messageModel({
                       ...data,
-                      
+                      delete:[]
                     })
             await  newMessage.save()
             return "done"

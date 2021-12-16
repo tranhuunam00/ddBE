@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Request } from 'express';
-import { CreateMessageDto } from './dto/message.dto';
+import { CreateMessageDto, BaseMessageDto } from './dto/message.dto';
 import { FilterMessageDto } from './dto/message_param.dto';
 import { MessageService } from './message.service';
 import { Message } from './scheme/message.schema';
@@ -15,11 +15,11 @@ export class MessageController {
 
         private userService:UserService) {}
    
-    @Get()
+    @Get("test")
     async findAll() :Promise<Message[]>{
         return await this.messageService.findAllMessage();
     }
-
+ 
     @Post("")
     async create(@Body()   createMessageDto :CreateMessageDto, @Req() req,@Res() res){
         console.log(createMessageDto)
@@ -63,4 +63,10 @@ export class MessageController {
     ): Promise<Message[]> {
         return []
     }
+
+
+    // @Delete("/:targetId")
+    // async delete(@Res() res,@Req() req,@Body() BaseMessageDto){
+    //     let result = await this.
+    // }
 }

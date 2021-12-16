@@ -5,12 +5,15 @@ import { BaseFeedDto, CreateFeedDto } from './dto/feed.dto';
 import { Feed, FeedDocument } from './scheme/feed.schema';
 import { UserService } from '../user/user.service';
 import { BaseCommentDto } from './dto/comment';
+import { MessageBody, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
+import { Server,Socket  } from 'socket.io';
 
 @Injectable()
 export class FeedService {
     constructor( @Inject("FEED_MODEL")  private feedModel:Model<FeedDocument>,
     private userService: UserService
     ){}
+    
     //------------------------find one---------------------------
     async findOneById(id:string){
         try {

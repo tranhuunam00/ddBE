@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
 import { required } from 'joi';
 import { Document } from 'mongoose';
 
@@ -17,10 +18,12 @@ export class Message {
   targetId: string;
   @Prop()
   time: string;
-  
+  @Prop()
+  delete:string[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
+
 // import * as mongoose from 'mongoose';
 
 // export const MessageSchema = new mongoose.Schema({

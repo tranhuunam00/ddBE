@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { FeedModule } from '../feed/feed.module';
+import { EventsGateway } from '../events/event,gateway';
 
 @Module({
   imports: [MessageModule,
@@ -16,7 +17,7 @@ import { FeedModule } from '../feed/feed.module';
     signOptions: { expiresIn: '500s' },
   }),],
   controllers: [FileController],
-  providers: [FileService]
+  providers: [FileService,EventsGateway]
 })
 export class FileModule {
   configure(consumer: MiddlewareConsumer) {

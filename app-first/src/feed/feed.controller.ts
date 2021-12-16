@@ -15,7 +15,7 @@ import { BaseCommentDto } from './dto/comment';
 
 @Controller('feed')
 export class FeedController {
-   
+    
     constructor(
         private eventsGateway:EventsGateway,
         private feedService: FeedService,
@@ -31,6 +31,7 @@ export class FeedController {
         else{
             await this.eventsGateway.likeFeed(data.event,result)
             res.json(result)
+            
         }
     }  
     //------------------------------- Comment------------------------------------------
