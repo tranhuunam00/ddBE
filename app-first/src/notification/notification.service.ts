@@ -33,11 +33,26 @@ export class NotificationService {
     //------------------------findLimit
     async findLimit(limit:number,offset:number,targetId:string):Promise<Notifi[]>{
         try{ 
-            let result = await this.notifiModel.find({"targetUserId":targetId}).skip(offset).limit(limit).sort({time:-1}).exec();
+            let result = await Promise.all([this.notifiModel.find({"targetUserId":targetId}).skip(offset).limit(limit).sort({time:-1}).exec()]); 
             console.log(result);
-            if(result!=null){
-                return result
+            if(result[0]!=null){
+                return result[0]
             }else{return []}
+             
+        }catch (e) {return []}    
+    }
+    async findLimitNotTargetId(limit:number,offset:number,listFr:string[]):Promise<Notifi[]>{
+        try{ 
+            if(listFr.length>0){
+                let array=[];
+                listFr.map(fr=>array.push(this.notifiModel.find({"sourceUserId":fr,"type":"newFeed"}).skip(offset).limit(limit).sort({time:-1}).exec()))
+                let result = await Promise.all(array); 
+                console.log(result);
+                if(result!=null){
+                    return result
+                 }else{return []}
+            }else{return []}
+            
              
         }catch (e) {return []}    
     }   

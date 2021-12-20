@@ -14,13 +14,21 @@ export class NotificationController {
         
         ){}
     @Get("findLimit")
-    async findLimit(@Query() filerNotifiDto: FilterNotifiDto){
+    async findLimit(@Query() filerNotifiDto: FilterNotifiDto,@Res() res){
+        const {limit,offset,startedAt,endedAt,sourceUserId,targetUserId}=filerNotifiDto;
+        console.log(limit)
+        var data= await this.notifiSevice.findLimit(limit,offset,targetUserId);
+        return res.json(data.reverse());
+        console.log(data.reverse());
+    }
+    @Get("findLimitNotTargetId")
+    async findLimitNotTargetId(@Query() filerNotifiDto: FilterNotifiDto,@Req() req,@Res() res){
         const {limit,offset,startedAt,endedAt,sourceUserId,targetUserId}=filerNotifiDto;
         console.log(limit)
         
-        var data= await this.notifiSevice.findLimit(limit,offset,targetUserId);
-        return data.reverse();
-        console.log(data.reverse());
+        var data= await this.notifiSevice.findLimitNotTargetId(limit,offset,req.user["friend"],);
+        return res.json(data)
+     
     }
     ///////////////////////////////////tạo thông bao moi----------------
     @Post("")

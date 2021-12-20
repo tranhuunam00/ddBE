@@ -11,6 +11,7 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { EventsGateway } from '../events/event,gateway';
 import { UserService } from '../user/user.service';
 import { BaseCommentDto } from './dto/comment';
+import { NotificationService } from '../notification/notification.service';
 
 
 @Controller('feed')
@@ -19,7 +20,8 @@ export class FeedController {
     constructor(
         private eventsGateway:EventsGateway,
         private feedService: FeedService,
-        private userService: UserService
+        private userService: UserService,
+        private notifiService: NotificationService,
     ){}
 
     //----------------------------like tym-----------------------------------------
@@ -65,10 +67,11 @@ export class FeedController {
                 console.log(createFeedDto)
                 const result= await this.feedService.create(createFeedDto);
                 if(result!="error"&&result!=undefined){
-                   
                     console.log("gửi đến tất cả bạn bè này")
                     console.log(req.user["friend"])
-                    this.eventsGateway.createNewFeed({feedId:result,...createFeedDto},req.user["friend"])
+                    await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":"","content":"","createdAt":createFeedDto.createdAt})
+                    this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
+                                        sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
                     res.json(result)
                 }
                 else{ res.json("error")}

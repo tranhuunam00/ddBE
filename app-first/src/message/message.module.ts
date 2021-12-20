@@ -20,7 +20,7 @@ import { EventsGateway } from '../events/event,gateway';
     });
     schema.post('find', function(res,next){
       console.log("chạy qua cái này 1")
-      console.log(res)
+      // console.log(res)
       next()
     });
     // schema.post('find', function(result) {

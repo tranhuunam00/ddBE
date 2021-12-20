@@ -19,7 +19,7 @@ export class MessageController {
     async findAll() :Promise<Message[]>{
         return await this.messageService.findAllMessage();
     }
- 
+    
     @Post("")
     async create(@Body()   createMessageDto :CreateMessageDto, @Req() req,@Res() res){
         console.log(createMessageDto)
@@ -37,9 +37,32 @@ export class MessageController {
         console.log(typeof sourceId)
        var data= await this.messageService.findLimit(limit,offset,sourceId,targetId);
        return data.reverse();
-       console.log(data.reverse());
+  
     }
-    
+    //...........................................
+    // @Get("/limit")
+    // async findLimit( @Query() data: {limit:number, offset:number},@Req() req: Request){
+
+    // }
+    @Get("/msgLimit") 
+    @UsePipes(new ValidationPipe({ transform: true }))
+
+    async findLimitMessage( @Query() data: {limit:number, offsetUser:number,targetId:string,offsetTarget:number},@Req() req: Request):Promise<AllMsgFrI>{
+       let {limit,offsetUser,offsetTarget,targetId}=data;
+       if(limit==undefined){limit=30}
+       if(offsetUser==undefined){offsetUser=0}
+       console.log(limit,offsetUser)
+       const sourceId=req.user["_id"];
+       
+        limit=limit.valueOf()
+        offsetUser=offsetUser.valueOf()
+       var result= await this.messageService.findAllMessageFr(limit,offsetUser,sourceId,[targetId],offsetTarget);
+       return result;
+      
+    }
+
+
+    //------------
     @Get("/allMsgFR") 
     @UsePipes(new ValidationPipe({ transform: true }))
 
@@ -47,10 +70,12 @@ export class MessageController {
        let {limit,offset}=data;
        if(limit==undefined){limit=30}
        if(offset==undefined){offset=0}
+       console.log(limit,offset)
        const sourceId=req.user["_id"];
        const hadMessageList =req.user["hadMessageList"];
-       console.log(hadMessageList)
-       var result= await this.messageService.findAllMessageFr(limit,offset,sourceId,hadMessageList);
+        limit=limit.valueOf()
+        offset=offset.valueOf()
+       var result= await this.messageService.findAllMessageFr(limit,offset,sourceId,hadMessageList,-1);
        return result;
       
     }

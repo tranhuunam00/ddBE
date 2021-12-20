@@ -72,7 +72,7 @@ import { BaseNotifiDto } from '../notification/dto/notifi_dto';
           if(listFr[i] in clients){
               console.log(listFr[i]);
               console.log("--da emit-------")
-              clients[listFr[i]].emit("test",data)}
+              clients[listFr[i]].emit("newFeed",data)}
         }
       }
     @SubscribeMessage('identity')

@@ -13,10 +13,12 @@ import { UserModule } from '../user/user.module';
 import { EventsModule } from '../events/event.module';
 import { EventsGateway } from '../events/event,gateway';
 import { MessageModule } from '../message/message.module';
+import { NotificationModule } from '../notification/notification.module';
 @Module({
   imports: [DatabaseModule,MongooseModule.forFeature([{name:Feed.name,schema:UserSchema}]),
   UserModule,
   MessageModule,
+  NotificationModule,
   JwtModule.register({
     secret: "secretKey",
     signOptions: { expiresIn: '1000s' },

@@ -115,7 +115,7 @@ export class FileController {
     //................................upload multi.--------------------------
     @Post('uploadFiles')
     @UseInterceptors(FileFieldsInterceptor([
-        { name: 'img', maxCount: 2 },
+        { name: 'img', maxCount: 10 },
         { name: 'background', maxCount: 1 },
         ],{
             storage:diskStorage({
@@ -124,7 +124,6 @@ export class FileController {
                     console.log(file.originalname+uuidv4())
                     let array=file.originalname.split('.')
                     const filename = uuidv4();
-
                     const extension = array[array.length-1];
                     console.log(extension)
                      cb(null,`${filename}.${extension}`)
