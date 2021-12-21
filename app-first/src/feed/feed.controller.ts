@@ -93,17 +93,33 @@ export class FeedController {
         }catch(e){ res.json("error")}
         
     }
+    ///----------------------
+    @Get("testRule/:rule")
+    async testRule(@Res() res ,@Req() req,@Param() params){
+        console.log(params.rule)
+        let result = await this.feedService.testRule(params.rule)
+        res.json(result)
+    }
     
+    //---------------------------------
     @Get("limitFeedOwn")
     @UsePipes(new ValidationPipe({ transform: true }))
     async getFeedLimit(@Query() filerFeedDto: FilterFeedDto,@Res() res: Response,@Req() req: Request){
         console.log("limitFeedOwn")
-        console.log(req.user["_id"].toString())
         const {limit,offset,startedAt,endedAt,sourceId}=filerFeedDto;
-        var a = await this.feedService.findLimit(limit,offset,sourceId)
+        console.log(req.user["_id"].toString())
+        if(req.user["_id"]!=sourceId){
+            
+        let a = await this.feedService.findLimitRule(limit,offset,sourceId,"every")
+        let b = await this.feedService.findLimitRule(limit,offset,sourceId,"friend")
         console.log("kết quả của feed limit l à ")
-        console.log(a)
-        return res.json(a);
+        let c= a.concat(b)
+        return res.json(c);
+        }else{
+            let a = await this.feedService.findLimit(limit,offset,sourceId)
+            return res.json(a);
+        }
+        
     }
     //----------------------------get feed -----------
     @Get("/:sourceFeedId")

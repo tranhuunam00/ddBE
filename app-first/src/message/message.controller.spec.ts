@@ -11,7 +11,7 @@ describe('MessageController', () => {
 
     controller = module.get<MessageController>(MessageController);
   });
-
+  
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });

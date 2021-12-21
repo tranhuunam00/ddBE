@@ -25,6 +25,10 @@ export class FeedService {
             return "error"
         }
     }
+    async testRule( rule:string ){
+        console.log(rule)
+       return  await this.feedModel.findOne({rule:'onlyme'})
+    }
     //...........................
     async create(data:CreateFeedDto){
         try{
@@ -47,6 +51,16 @@ export class FeedService {
     }   
     async findLimit(limit:number,offset:number,sourceId:string):Promise<BaseFeedDto[]>{
         try {var a= await this.feedModel.find({sourceUserId:sourceId}).skip(offset).limit(limit).sort({createdAt:-1}).exec();
+         if(a!=null){
+            return a
+         }
+            
+        }
+        catch (err) { return []};
+    }   
+    //
+    async findLimitRule(limit:number,offset:number,sourceId:string,rule:string):Promise<BaseFeedDto[]>{
+        try {var a= await this.feedModel.find({sourceUserId:sourceId,rule:rule}).skip(offset).limit(limit).sort({createdAt:-1}).exec();
          if(a!=null){
             return a
          }
