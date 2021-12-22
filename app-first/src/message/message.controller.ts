@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete,  Get, Param, ParseIntPipe, Post, Query, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateMessageDto, BaseMessageDto } from './dto/message.dto';
 import { FilterMessageDto } from './dto/message_param.dto';
@@ -31,11 +31,11 @@ export class MessageController {
 
     @Get("/individual") 
     @UsePipes(new ValidationPipe({ transform: true }))
-    async findLimit( @Query() filerMessageDto: FilterMessageDto):Promise<Message[]>{
+    async findLimit( @Query() filerMessageDto: FilterMessageDto,@Req() req):Promise<Message[]>{
        const {limit,offset,startedAt,endedAt,sourceId,targetId}=filerMessageDto;
        console.log(limit)
         console.log(typeof sourceId)
-       var data= await this.messageService.findLimit(limit,offset,sourceId,targetId);
+       var data= await this.messageService.findLimit(limit,offset,sourceId,targetId,req.user["_id"].toString());
        return data.reverse();
   
     }
@@ -68,10 +68,15 @@ export class MessageController {
 
     async findAllMessage( @Query() data: {limit:number, offset:number},@Req() req: Request):Promise<AllMsgFrI>{
        let {limit,offset}=data;
+
        if(limit==undefined){limit=30}
+
        if(offset==undefined){offset=0}
+
        console.log(limit,offset)
+
        const sourceId=req.user["_id"];
+       
        const hadMessageList =req.user["hadMessageList"];
         limit=limit.valueOf()
         offset=offset.valueOf()
@@ -89,9 +94,16 @@ export class MessageController {
         return []
     }
 
-
-    // @Delete("/:targetId")
-    // async delete(@Res() res,@Req() req,@Body() BaseMessageDto){
-    //     let result = await this.
-    // }
+    @Delete("/individual")
+    async deleteOne(@Res() res,@Req() req,@Param() params,@Body() body : BaseMessageDto){
+        
+        let result = await this.messageService.deleteOne(body,req.user["_id"].toString());
+        res.json(result);
+    }
+    
+    @Delete("/:targetId")
+    async deleteAll(@Res() res,@Req() req,@Param() params){
+        let result = await this.messageService.deleteAll(req.user["_id"].toString(),params.targetId);
+        res.json(result);
+    }
 }

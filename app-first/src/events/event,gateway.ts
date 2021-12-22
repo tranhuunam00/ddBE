@@ -75,6 +75,15 @@ import { BaseNotifiDto } from '../notification/dto/notifi_dto';
               clients[listFr[i]].emit("newFeed",data)}
         }
       }
+      async createNewTag ( data: any,listTag: string[]) {
+        console.log(data);
+        for(let i=0;i<listTag.length;i++){
+          if(listTag[i] in clients){
+              console.log(listTag[i]);
+              console.log("--da emit-------")
+              clients[listTag[i]].emit("newTag",data)}
+        }
+      }
     @SubscribeMessage('identity')
     async identity(@MessageBody() data: number): Promise<number> {
       return data;

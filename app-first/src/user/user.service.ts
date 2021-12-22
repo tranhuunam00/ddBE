@@ -600,14 +600,81 @@ export class UserService {
           console.log(id)
           let result = await this.userModel.findOne({_id:idFr})
           if(result!=null){
-            if(listHadMsgUser.indexOf(idFr)<0){
-              let listHadMsgFr = result.hadMessageList;
+            let listHadMsgFr = result.hadMessageList;
+            if(listHadMsgFr.indexOf(id)<0){ 
               listHadMsgFr.push(id);
-              listHadMsgUser.push(idFr);
-              let resultAll = await Promise.all([this.userModel.findByIdAndUpdate({_id:id},{hadMessageList:listHadMsgUser}),
+            }
+
+            if(listHadMsgUser.indexOf(idFr)<0){
+               listHadMsgUser.push(idFr);
+            }
+           
+            let resultAll = await Promise.all([
+                this.userModel.findByIdAndUpdate({_id:id},{hadMessageList:listHadMsgUser}),
                 this.userModel.findByIdAndUpdate({_id:idFr},{hadMessageList:listHadMsgFr})]);
               
-              if(resultAll[0]!=null&&resultAll[1]!=null){
+            if(resultAll[0]!=null&&resultAll[1]!=null){
+                return "done"
+            }else{return "error"}
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
+      ///.............
+      async deleteHadUserChat(idFr:string,idUser: string){
+        try{
+          console.log("fr id là")
+          console.log(idFr)
+          let result = await Promise.all([
+              this.userModel.findOne({_id:idUser}),
+            ])
+          
+          if(result[0]!=null){
+
+            let listHadMsgUser = result[0].hadMessageList;
+
+            if(listHadMsgUser.indexOf(idFr)>-1){
+              
+              for(let i=0;i<listHadMsgUser.length;i++){
+                if(listHadMsgUser[i]==idFr){
+                  listHadMsgUser.splice(i,1);
+                  i--
+                }
+              }
+              
+              let resultAll = await Promise.all([
+                this.userModel.findByIdAndUpdate({_id:idUser},{hadMessageList:listHadMsgUser}),  
+              ]);
+              
+              if(resultAll[0]!=null){
+                return "done"
+              }else{return "error"}
+            }else{return "error"}
+            
+          }else{return "error"}
+        }catch(e){return "error"}
+      }
+      ///----------------------------------------
+      async addOneHadUserChat(idFr:string,idUser: string){
+        try{
+          console.log("fr id là")
+          console.log(idFr)
+          let result = await Promise.all([
+              this.userModel.findOne({_id:idFr}),
+            ])
+          
+          if(result[0]!=null){
+
+            let listHadMsgFr = result[0].hadMessageList;
+
+            if(listHadMsgFr.indexOf(idUser)==-1){
+              
+              listHadMsgFr.push(idUser);
+              
+              let resultAll = await Promise.all([
+                this.userModel.findByIdAndUpdate({_id:idFr},{hadMessageList:listHadMsgFr}),  
+              ]);
+              
+              if(resultAll[0]!=null){
                 return "done"
               }else{return "error"}
             }else{return "error"}

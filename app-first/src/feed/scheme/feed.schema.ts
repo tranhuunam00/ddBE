@@ -23,6 +23,8 @@ export class Feed {
   @Prop()
   rule:string[]
   @Prop()
+  tag:string[]
+  @Prop()
   createdAt:string;
 }
 

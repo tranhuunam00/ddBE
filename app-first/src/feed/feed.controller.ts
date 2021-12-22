@@ -69,9 +69,28 @@ export class FeedController {
                 if(result!="error"&&result!=undefined){
                     console.log("gửi đến tất cả bạn bè này")
                     console.log(req.user["friend"])
-                    await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":"","content":"","createdAt":createFeedDto.createdAt})
-                    this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
+                    if(createFeedDto.tag.length>0){
+
+                        await Promise.all([this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt}),
+
+                        this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":"","createdAt":createFeedDto.createdAt})])
+
+                        this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
+                        
+                        this.eventsGateway.createNewTag({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
+                                        sourceRealnameUser:req.user["realName"],comment:[],like:[]},createFeedDto.tag,)
+                        
+                        
+                    }else{
+
+                        await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt})
+                        
+                        this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
+                                        sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
+                    }
+                    
+               
                     res.json(result)
                 }
                 else{ res.json("error")}

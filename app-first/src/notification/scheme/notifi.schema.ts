@@ -16,7 +16,7 @@ export class Notifi {
   @Prop()
   sourceUserId:string;
   @Prop()
-  targetUserId:string
+  targetUserId:string[]
   @Prop()
   content: string;
 }

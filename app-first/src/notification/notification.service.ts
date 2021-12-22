@@ -14,7 +14,8 @@ export class NotificationService {
     async create(data:BaseNotifiDto){
         try{
             let id :String;
-            console.log("create")
+            console.log("create notifi")
+            console.log(data)
              let newNotifi=await new this.notifiModel({
                       ...data,
                       isSeen:false,

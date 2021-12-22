@@ -69,8 +69,8 @@ export class UserController {
     console.log("data là")
     console.log(data)
     let result= await Promise.all([this.userService.addFr(request.user,data),
-      this.notifiService.create({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":data})])
-    await this.eventsGateway.handleFr({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":data},data)
+      this.notifiService.create({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[data]})])
+    await this.eventsGateway.handleFr({"type":"addFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[data]},data)
     console.log(result[0])
     
     response.json(result[0])
@@ -84,8 +84,8 @@ export class UserController {
     let user=request.user;
     console.log(id)
     let result = await Promise.all([this.userService.addFrConfirm(request.user,id),
-      this.notifiService.create({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id})])
-      await this.eventsGateway.handleFr({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)
+      this.notifiService.create({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[id]})])
+      await this.eventsGateway.handleFr({"type":"confirmFr","createdAt":body.createdAt,"content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[id]},id)
     
      response.json(result[0]) 
   } 
@@ -99,7 +99,7 @@ export class UserController {
     let user=request.user;
     console.log(id)
     let result = await Promise.all([this.userService.removeFriend(request.user,id),
-       this.eventsGateway.handleFr({"type":"removeFriend","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+       this.eventsGateway.handleFr({"type":"removeFriend","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[id]},id)]) 
     
     if(result[0] !="error"){ response.json(result) }
     else{ response.json("error") }
@@ -114,7 +114,7 @@ export class UserController {
     let user=request.user;
     console.log(id)
     let result = await Promise.all([this.userService.removeFrRequest(request.user,id),
-      this.eventsGateway.handleFr({"type":"removeFrRequest","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+      this.eventsGateway.handleFr({"type":"removeFrRequest","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[id]},id)]) 
 
     response.json(result[0]) 
     
@@ -128,12 +128,17 @@ export class UserController {
     let user=request.user;
     console.log(id)
     let result = await Promise.all([this.userService.removeFrConfirm(request.user,id),
-      this.eventsGateway.handleFr({"type":"removeFrConfirm","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":id},id)]) 
+      this.eventsGateway.handleFr({"type":"removeFrConfirm","createdAt":"","content":"","sourceUserId":request.user["_id"].toString(),"targetUserId":[id]},id)]) 
 
     response.json(result[0]) 
     
   } 
 
+  @Post("addOneHadMsgList")
+  async addOneHadMsgList(@Res() res, @Req() req ,@Body() body :{idFr:string, idUser:string}){
+    let result = await this.userService.addOneHadUserChat(body.idFr,body.idUser);
+    res.json(result);
+  }
 
   @Get("test/:id")
   @UsePipes(new ValidationPipe({ transform: true }))

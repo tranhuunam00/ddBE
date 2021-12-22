@@ -14,6 +14,8 @@ export class BaseFeedDto {
     comment:BaseCommentDto[]
   @IsArray()
     like:string[]
+  @IsArray()
+    tag:string[]
   @IsString()
     createdAt:string
   @IsString()

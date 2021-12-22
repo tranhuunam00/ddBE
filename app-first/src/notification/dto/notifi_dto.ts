@@ -11,7 +11,7 @@ export class BaseNotifiDto {
  
     readonly sourceUserId:string
 
-    readonly targetUserId:string
+    readonly targetUserId:string[]
 
 }
 //

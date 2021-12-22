@@ -1,18 +1,29 @@
 import { Get, Inject, Injectable, Param, ParseIntPipe, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { CreateMessageDto } from './dto/message.dto';
+import { BaseMessageDto, CreateMessageDto } from './dto/message.dto';
 import { FilterMessageDto } from './dto/message_param.dto';
 import { MessageDocument, Message } from './scheme/message.schema';
 import * as bcrypt from 'bcrypt';
 import { AllMsgFrI } from './interFace/msgListFr';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class MessageService {
-    constructor( @Inject("MESSAGE_MODEL")  private messageModel:Model<MessageDocument>){}
+    constructor(
+        
+        @Inject("MESSAGE_MODEL")  private messageModel:Model<MessageDocument>,
+
+        private userService: UserService
+    
+    ){}
     //..........
     async findAllMessage(): Promise<Message[]> {
         var result =await this.messageModel.find().exec();
         console.log(result);
         return result
+    }
+    async findOne(msg :BaseMessageDto) :Promise<Message>{
+
+        return await this.messageModel.findOne({message:msg.message,time:msg.time}).exec();
     }
     // tạo tin nhắn mới từ dữ liệu post lên và lưu vào data
     async create(data:CreateMessageDto){
@@ -27,11 +38,11 @@ export class MessageService {
         
     }   
     //
-    async findLimit(limit:number,offset:number,sourceId:string,targetId:string):Promise<Message[]>{
+    async findLimit(limit:number,offset:number,sourceId:string,targetId:string,idDelete:string):Promise<Message[]>{
         try{ 
             const li:number = parseInt(limit.toString(),10)
             const offs:number=parseInt(offset.toString(),10)
-            return this.messageModel.find({"sourceId":sourceId, "targetId":targetId}).skip(offs).limit(li).sort({time:-1}).exec();
+            return this.messageModel.find({"sourceId":sourceId, "targetId":targetId ,delete:{$not:{$in:[idDelete]}}}).skip(offs).limit(li).sort({time:-1}).exec();
         }catch (e) {return []}    
     }   
     // 
@@ -53,10 +64,11 @@ export class MessageService {
             console.log(typeof li)
             
             hadMessageList.map(id=>{
-                listApi.push(this.findLimit(li,offs,sourceId,id))
-                listApi.push(this.findLimit(li,offsTarget,id,sourceId))
+                listApi.push(this.findLimit(li,offs,sourceId,id,sourceId.toString()))
+                listApi.push(this.findLimit(li,offsTarget,id,sourceId,sourceId.toString()))
             })
             let result = await Promise.all(listApi)
+            
             for (let i = 0; i < hadMessageList.length;i++){
                 let  newListMsg :Message[] =[]
                 if(result[i*2].length>0&&result[i*2+1].length>0){
@@ -83,6 +95,68 @@ export class MessageService {
             return data
         }catch (e) {return {}}
     }
-    //
+    //------------------------delete all-------------------------------
+    async deleteAll(sourceId:string,targetId: string,){
+        try{
+            
+            await Promise.all([
+                this.messageModel.updateMany({targetId:targetId,sourceId:sourceId},{$addToSet: {delete: sourceId}}),
+
+                this.messageModel.updateMany({targetId:sourceId,sourceId:targetId},{$addToSet: {delete: sourceId}})
+                // this.messageModel.updateMany({targetId:targetId,sourceId:sourceId}, {delete: []}),
+            ]);
+            return "done"
+        }catch (e) {return "error"}
+    }
+    async deleteOne(msg :BaseMessageDto,userId:string){
+        try{
+            if(userId==msg.targetId||userId==msg.sourceId){
+
+                let update = await 
+                this.messageModel.findOneAndUpdate(
+                    {targetId:msg.targetId,sourceId:msg.sourceId,message:msg.message,time:msg.time},
+                    {$addToSet: {delete: userId}})
+                // this.messageModel.updateMany({targetId:targetId,sourceId:sourceId}, {delete: []}),
+
+                console.log("kết quả sau khi update là")
+                console.log(update)
+                if(update!=null){
+
+                    let result = await Promise.all([
+                        this.messageModel.findOne({targetId:msg.targetId,sourceId:msg.sourceId,delete:{$not:{$in:[userId]}}}),
+                        this.messageModel.findOne({targetId:msg.sourceId,sourceId:msg.targetId,delete:{$not:{$in:[userId]}}})
+                        
+                    ])
+                    console.log("kết quả tìm được ")
+                    console.log(result)
+                    if(result[0]==null && result[1] == null){
+                        console.log("hết tin nhắn rồi ");
+                        let resultUser
+                        if(userId==msg.targetId){
+                            resultUser= await Promise.all([
+                                    this.userService.deleteHadUserChat(msg.sourceId,msg.targetId)
+                            ])
+                        }else{
+                            resultUser= await Promise.all([
+                                this.userService.deleteHadUserChat(msg.targetId,msg.sourceId)
+                            
+                            ])
+                        }
+                    
+                        if(resultUser[0]=="done"){
+                            return "0"
+                        }else{return "error"}
+                    }
+                    return "done" 
+                }else{return "error"}
+                
+                 
+                
+                return "done"
+            }else{return "error"}
+            
+          
+        }catch (e) {return "error"}
+    }
     
 }

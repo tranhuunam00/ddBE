@@ -27,7 +27,9 @@ export class FeedService {
     }
     async testRule( rule:string ){
         console.log(rule)
-       return  await this.feedModel.findOne({rule:'onlyme'})
+
+        return  await this.feedModel.findOneAndUpdate({rule:{$not:{$in:[rule]}}},
+            {$addToSet: {rule: "kk"}})
     }
     //...........................
     async create(data:CreateFeedDto){
