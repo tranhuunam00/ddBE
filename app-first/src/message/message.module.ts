@@ -10,6 +10,7 @@ import { JwtMiddleware } from '../core/middleware/jwt.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { EventsGateway } from '../events/event,gateway';
+import { NotificationModule } from '../notification/notification.module';
 @Global()
 @Module({
   imports: [DatabaseModule,MongooseModule.forFeatureAsync([{name:Message.name,
@@ -46,6 +47,7 @@ import { EventsGateway } from '../events/event,gateway';
     return schema;
   },}]),
   UserModule,
+  NotificationModule,
   JwtModule.register({
     secret: "secretKey",
     signOptions: { expiresIn: '500s' },

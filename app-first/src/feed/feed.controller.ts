@@ -129,11 +129,18 @@ export class FeedController {
         console.log(req.user["_id"].toString())
         if(req.user["_id"]!=sourceId){
             
-        let a = await this.feedService.findLimitRule(limit,offset,sourceId,"every")
-        let b = await this.feedService.findLimitRule(limit,offset,sourceId,"friend")
-        console.log("kết quả của feed limit l à ")
-        let c= a.concat(b)
-        return res.json(c);
+            if(req.user["friend"].indexOf(sourceId)>-1){
+                let a = await this.feedService.findLimitRule(limit,offset,sourceId,"every")
+                let b = await this.feedService.findLimitRule(limit,offset,sourceId,"friend")
+                console.log("kết quả của feed limit l à ")
+                let c= a.concat(b)
+                return res.json(c);
+            }else{
+                let a = await this.feedService.findLimitRule(limit,offset,sourceId,"every")
+                return res.json(a);
+
+            }
+        
         }else{
             let a = await this.feedService.findLimit(limit,offset,sourceId)
             return res.json(a);

@@ -29,8 +29,30 @@ export class NotificationService {
             .catch((err) => {return "error"})
             console.log(a)
             return a
-    }catch(e){return "error"}
+     }catch(e){return "error"}
     }   
+    async createNotifiMsg(data:BaseNotifiDto){
+        try{
+            let id :String;
+            console.log("create notifi")
+            console.log(data)
+            await this.notifiModel.deleteMany({targetUserId:data.targetUserId,sourceUserId:data.sourceUserId,type:data.type});
+
+             let newNotifi=await new this.notifiModel({
+                      ...data,
+                      isSeen:false,
+                    })
+            // console.log(newfeed.id);
+            var a= await  newNotifi.save()
+            .then((notifi) => {
+                console.log(notifi.id);
+                return notifi.id
+            }) 
+            .catch((err) => {return "error"})
+            console.log(a)
+            return a
+     }catch(e){return "error"}
+    } 
     //------------------------findLimit
     async findLimit(limit:number,offset:number,targetId:string):Promise<Notifi[]>{
         try{ 

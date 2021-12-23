@@ -6,14 +6,15 @@ import { MessageDocument, Message } from './scheme/message.schema';
 import * as bcrypt from 'bcrypt';
 import { AllMsgFrI } from './interFace/msgListFr';
 import { UserService } from '../user/user.service';
+import { NotificationService } from '../notification/notification.service';
 @Injectable()
 export class MessageService {
     constructor(
         
         @Inject("MESSAGE_MODEL")  private messageModel:Model<MessageDocument>,
 
-        private userService: UserService
-    
+        private userService: UserService,
+        private notifiService:NotificationService
     ){}
     //..........
     async findAllMessage(): Promise<Message[]> {
@@ -32,6 +33,9 @@ export class MessageService {
                       delete:[]
                     })
             await  newMessage.save()
+            await this.notifiService.createNotifiMsg({
+                type:"newMsg",sourceUserId:data.sourceId,targetUserId:[data.targetId],content:data.sourceId,
+                createdAt:data.time})
             return "done"
         }catch(err){return "error"}
 
@@ -101,10 +105,11 @@ export class MessageService {
             
             await Promise.all([
                 this.messageModel.updateMany({targetId:targetId,sourceId:sourceId},{$addToSet: {delete: sourceId}}),
-
-                this.messageModel.updateMany({targetId:sourceId,sourceId:targetId},{$addToSet: {delete: sourceId}})
-                // this.messageModel.updateMany({targetId:targetId,sourceId:sourceId}, {delete: []}),
+                this.messageModel.updateMany({targetId:sourceId,sourceId:targetId},{$addToSet: {delete: sourceId}}),
+                this.userService.deleteHadUserChat(targetId,sourceId)
+                 // this.messageModel.updateMany({targetId:targetId,sourceId:sourceId}, {delete: []}),
             ]);
+
             return "done"
         }catch (e) {return "error"}
     }
