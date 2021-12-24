@@ -26,12 +26,20 @@ export class FeedController {
 
     //----------------------------like tym-----------------------------------------
     @Post("likeFeed")
-    async likeFeed(@Body() data:{feedId:string,event:string}, @Res() res: Response,@Req() req: Request){
+    async likeFeed(@Body() data:{feedId:string,event:string,createdAt:string}, @Res() res: Response,@Req() req: Request){
         console.log(data)
-        var result = await this.feedService.likeFeed(req.user["_id"].toString(),data.feedId,data.event)
-        if(result=="error"){res.json("error")}
+        var result = await Promise.all([
+            this.feedService.likeFeed(req.user["_id"].toString(),data.feedId,data.event,data.createdAt)
+            
+        ])
+        if(result[0]=="error"){res.json("error")}
         else{
-            await this.eventsGateway.likeFeed(data.event,result)
+            if(data.event=="like"&&result[0]!=req.user["_id"].toString()){
+                 await this.eventsGateway.likeFeed(
+                {feedUserId:result[0],createdAt:data.createdAt,feedId:data.feedId,type:data.event,
+                    realNameLiked:req.user["realName"] , avatarLiked:req.user["avatarImg"][req.user["avatarImg"].length-1],idUserLiked:req.user["_id"].toString()})
+            }
+           
             res.json(result)
             
         }
@@ -45,8 +53,28 @@ export class FeedController {
             console.log("----running create comment-------------")
             console.log(baseCommentDto.sourceUserId)
             console.log(params.feedId)
-            const result = await this.feedService.createComment(params.feedId,baseCommentDto)
-            return res.json(result)
+            const result = await  this.feedService.createComment(params.feedId,baseCommentDto)
+            if(result!="error" ){
+                console.log("emit nhé comment")
+
+                let allUserEmit =  [result.sourceUserId,...result.tag]
+                for(let i = 0; i < allUserEmit.length;i++){
+                    if(allUserEmit[i]==baseCommentDto.sourceUserId!){
+                        allUserEmit.splice(i,1);
+                        i--;
+                    }
+                }
+
+                for(let i=0;i<allUserEmit.length;i++){
+                    if(allUserEmit[i]!=req.user["_id"].toString()){    
+                        this.eventsGateway.likeFeed({feedUserId:allUserEmit[i],createdAt:baseCommentDto.createdAt,feedId:params.feedId,type:"comment",
+                        realNameLiked:req.user["realName"] , avatarLiked:req.user["avatarImg"][req.user["avatarImg"].length-1],idUserLiked:req.user["_id"].toString()}) 
+                    }
+                }
+                
+
+            }
+            return res.json("done")
             
             
         }catch(e){ res.json("error")}
@@ -71,9 +99,9 @@ export class FeedController {
                     console.log(req.user["friend"])
                     if(createFeedDto.tag.length>0){
 
-                        await Promise.all([this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt}),
+                        let result= await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt})
 
-                        this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":"","createdAt":createFeedDto.createdAt})])
+                        await this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":result.toString(),"createdAt":createFeedDto.createdAt})
 
                         this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)

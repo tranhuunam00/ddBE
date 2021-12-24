@@ -2,8 +2,9 @@ import { IsArray, IsInt, IsNotEmpty, IsString } from "class-validator";
 import { BaseCommentDto } from "./comment";
 
 export class BaseFeedDto {
-  @IsString()
-    pathImg: string[] 
+
+  pathImg: string[] 
+  pathVideo: string[] 
   @IsString()
     messages:string 
   @IsString()

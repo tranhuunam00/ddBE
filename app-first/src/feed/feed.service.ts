@@ -7,11 +7,13 @@ import { UserService } from '../user/user.service';
 import { BaseCommentDto } from './dto/comment';
 import { MessageBody, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Server,Socket  } from 'socket.io';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class FeedService {
     constructor( @Inject("FEED_MODEL")  private feedModel:Model<FeedDocument>,
-    private userService: UserService
+    private userService: UserService,
+    private notifiService: NotificationService
     ){}
     
     //------------------------find one---------------------------
@@ -71,11 +73,12 @@ export class FeedService {
         catch (err) { return []};
     }   
     //----------------like tym-----------------
-    async likeFeed(sourceId:string,feedId:string,event:string){
+    async likeFeed(sourceId:string,feedId:string,event:string,createdAt:string){
         try{
             const a= await this.userService.findById(sourceId);
             const b= await this.feedModel.findOne({_id:feedId});
             if(a!=null||b!=null){
+                let sourceFeedId = b.sourceUserId
                 let listLike=b.like
                 let isHad=false;
                 console.log(b)
@@ -109,7 +112,12 @@ export class FeedService {
                     console.log(listLike)
                     if(isHad==false){
                         listLike.push(sourceId);
-                       await this.feedModel.findOneAndUpdate({_id:feedId},{like:listLike})
+                       await Promise.all([
+                            this.feedModel.findOneAndUpdate({_id:feedId},{like:listLike}),
+                            this.notifiService.create({type: "likeFeed",targetUserId:[sourceFeedId],
+                                                sourceUserId: sourceId,createdAt:createdAt,content:feedId})
+                        ]);
+
                        return b.sourceUserId
                     }
                 }
@@ -130,8 +138,25 @@ export class FeedService {
                 let listComment =feed.comment;
                 listComment.push(comment)
                 console.log(listComment)
-                await this.feedModel.findOneAndUpdate({_id:feedId},{comment:listComment}).exec()
-                return "done"
+          
+                let allUserEmit =  [result.sourceUserId,...result.tag]
+                for(let i = 0; i < allUserEmit.length;i++){
+                    if(allUserEmit[i]==comment.sourceUserId!){
+                        allUserEmit.splice(i,1);
+                        i--;
+                    }
+                }
+                await Promise.all([
+                           
+                    this.feedModel.findOneAndUpdate({_id:feedId},{comment:listComment}).exec(),
+                    this.notifiService.createNotifiComment({type: "commentFeed",targetUserId:allUserEmit,sourceUserId:comment.sourceUserId,
+                        createdAt:comment.createdAt,content:feedId})
+                        
+                ]);
+               
+                
+                
+                return result
                 
             }else{return "error"}
         }catch(e){return "error"}

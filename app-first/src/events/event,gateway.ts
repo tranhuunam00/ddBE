@@ -37,11 +37,15 @@ import { BaseNotifiDto } from '../notification/dto/notifi_dto';
         console.log(data)
     }
     //----------------------like feed------------------
-    async likeFeed(data: any,feedUserId:string) {
-        if(feedUserId in clients){
-          clients[feedUserId].emit("likeFeed",data)
+    async likeFeed(dataFeed:
+      {feedUserId:string,createdAt:string, feedId:string,realNameLiked:string ,
+        type:string, avatarLiked:string,idUserLiked}) {
+        if(dataFeed.feedUserId in clients){
+          clients[dataFeed.feedUserId].emit("likeFeed",dataFeed)
         }
     }
+    //
+    
     //---------------gửi tin nhắn ----------------------------------------------------------------
     async emitClientMessage (data){
       if(clients[data.targetId]!=null){
