@@ -71,7 +71,9 @@ export class FeedController {
                         realNameLiked:req.user["realName"] , avatarLiked:req.user["avatarImg"][req.user["avatarImg"].length-1],idUserLiked:req.user["_id"].toString()}) 
                     }
                 }
-                
+                this.eventsGateway.emitCommentMsg({avatar:req.user["avatarImg"][req.user["avatarImg"].length-1],realName:req.user["realName"],
+                    id:req.user["_id"].toString(),feedId:params.feedId,createdAt:baseCommentDto.createdAt,
+                    })
 
             }
             return res.json("done")
@@ -99,11 +101,11 @@ export class FeedController {
                     console.log(req.user["friend"])
                     if(createFeedDto.tag.length>0){
 
-                        let result= await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt})
+                        let result1= await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":result.toString(),"createdAt":createFeedDto.createdAt})
 
                         await this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":result.toString(),"createdAt":createFeedDto.createdAt})
 
-                        this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
+                        this.eventsGateway.createNewFeed({feedId:result1,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
                         
                         this.eventsGateway.createNewTag({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
@@ -112,7 +114,7 @@ export class FeedController {
                         
                     }else{
 
-                        await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":"","createdAt":createFeedDto.createdAt})
+                        await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":result.toString(),"createdAt":createFeedDto.createdAt})
                         
                         this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
