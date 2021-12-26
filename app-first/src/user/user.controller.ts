@@ -30,8 +30,9 @@ export class UserController {
      ) {}
   //........................update Pw...............................
   @Put('/updatePassword')
-  async updatePassword(@Req() req: Request,@Body() body:{password:string}){
-    await this.userService.updatePassword(req.user["userName"],body.password)
+  async updatePassword(@Req() req: Request,@Body() body:{password:string},@Res() res){
+    let r = await this.userService.updatePassword(req.user["userName"],body.password)
+    res.json(r)
   }
   
   // lấy thông tin qua jwt có header là cookie jwt

@@ -66,7 +66,7 @@ import EventEmitter from 'events';
     async emitCommentMsg(data){
       for(const i in clients){
        
-        if(clients[i]!=null){
+        if(clients[i]!=null && i!=data["id"]){
           
           clients[i].emit("comment",data)
         }
