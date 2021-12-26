@@ -69,10 +69,16 @@ export class FeedController {
                     if(allUserEmit[i]!=req.user["_id"].toString()){    
                         this.eventsGateway.likeFeed({feedUserId:allUserEmit[i],createdAt:baseCommentDto.createdAt,feedId:params.feedId,type:"comment",
                         realNameLiked:req.user["realName"] , avatarLiked:req.user["avatarImg"][req.user["avatarImg"].length-1],idUserLiked:req.user["_id"].toString()}) 
+
+                        // this.eventsGateway.comment({avatar:req.user["avatarImg"][req.user["avatarImg"].length-1],realName:req.user["realName"],
+                        //     id:req.user["_id"].toString(),feedId:params.feedId,createdAt:baseCommentDto.createdAt,pathImg:baseCommentDto.pathImg,
+                        //     message:baseCommentDto.messages,idEmit:allUserEmit[i]
+                        //      })
                     }
                 }
+
                 this.eventsGateway.emitCommentMsg({avatar:req.user["avatarImg"][req.user["avatarImg"].length-1],realName:req.user["realName"],
-                    id:req.user["_id"].toString(),feedId:params.feedId,createdAt:baseCommentDto.createdAt,
+                    id:req.user["_id"].toString(),feedId:params.feedId,createdAt:baseCommentDto.createdAt,messages:baseCommentDto.messages,pathImg:baseCommentDto.pathImg
                     })
 
             }

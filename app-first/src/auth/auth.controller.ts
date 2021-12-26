@@ -89,9 +89,12 @@ export class AuthController {
     console.log(a[data.userName]);
     console.log()
     if(data.token==session[data.userName] || data.token==a[data.userName]){
-      await this.userService.updatePassword(data.userName,data.password);
+      let r= await this.userService.updatePassword(data.userName,data.password);
       delete request.session[data.userName]
-      return res.json("done")
+      if(r="done"){
+        return res.json("done")
+      }else{return res.json("error")}
+      
     }else{return res.json("error")}
   }
 

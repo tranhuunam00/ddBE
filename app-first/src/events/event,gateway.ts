@@ -9,13 +9,15 @@ import {
   import { MessageService } from '../message/message.service';
   import { Session } from '@nestjs/common';
 import { BaseNotifiDto } from '../notification/dto/notifi_dto';
+import EventEmitter from 'events';
   //
   var clients={};
   @WebSocketGateway()
   export class EventsGateway {
 
     constructor(){}
-
+   
+    
     @WebSocketServer()
     server: Server;
     
@@ -44,6 +46,13 @@ import { BaseNotifiDto } from '../notification/dto/notifi_dto';
           clients[dataFeed.feedUserId].emit("likeFeed",dataFeed)
         }
     }
+    async comment(dataFeed:
+      {avatar:string,realName:string,pathImg:string,message:string,idEmit:string,
+      id:string,feedId:string,createdAt:string}) {
+        if(dataFeed.idEmit in clients){
+          clients[dataFeed.idEmit].emit("comment",dataFeed)
+        }
+    }
     //
     
     //---------------gửi tin nhắn ----------------------------------------------------------------
@@ -53,14 +62,13 @@ import { BaseNotifiDto } from '../notification/dto/notifi_dto';
         clients[data.targetId].emit("message",data);
       }
     }
+    //
     async emitCommentMsg(data){
       for(const i in clients){
-        console.log("tất cả i")
-        console.log(i)
+       
         if(clients[i]!=null){
-          console.log("đã emit comment tới")
-          console.log("comment/"+data["feedId"])
-          clients[i].emit("123",data)
+          
+          clients[i].emit("comment",data)
         }
       }
     }

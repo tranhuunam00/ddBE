@@ -205,12 +205,19 @@ export class UserService {
       //...................................update pw.............................
       async updatePassword(userName: string,password: string){
         const hashedPassword = await bcrypt.hash(password,12);
-        await this.userModel.findOneAndUpdate({userName:userName},{password:hashedPassword})
-        await this.deleteJwt(userName)
+        let result =await Promise.all([
+          this.userModel.findOneAndUpdate({userName:userName},{password:hashedPassword}),
+          this.deleteJwt(userName)
+        ])
+        if(result[0]!=null){
+          return "done"
+        }else{
+          return "error"
+        }
       }
       //-----xóa jwt khi đang dùng
       async deleteJwt(userName:string){
-        var result = await this.tokenModel.findOneAndDelete({userName:userName}).sort({createdAt:-1})
+        var result = await this.tokenModel.deleteMany({userName:userName})
         console.log("kết quả khi tìm kiếm jwt là")
         console.log(result)
       }
