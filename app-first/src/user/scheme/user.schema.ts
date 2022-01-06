@@ -25,6 +25,8 @@ export class User {
   @Prop()
   createdAt:string
   @Prop()
+  seenTimeNotifi:string
+  @Prop()
   avatarImg: string[];
   @Prop()
   coverImg: string[];
@@ -36,6 +38,10 @@ export class User {
   friendConfirm:string[]
   @Prop()
   hadMessageList:string[]
+  @Prop()
+  feedImg:string[]
+  @Prop()
+  feedVideo:string[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -98,6 +98,7 @@ export class MessageController {
     async deleteOne(@Res() res,@Req() req,@Param() params,@Body() body : BaseMessageDto){
         
         let result = await this.messageService.deleteOne(body,req.user["_id"].toString());
+        console.log(result)
         res.json(result);
     }
     

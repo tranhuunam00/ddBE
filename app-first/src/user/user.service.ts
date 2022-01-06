@@ -63,6 +63,9 @@ export class UserService {
             let newUser=
                     new this.userModel({
                       ...data,
+                      feedImg:[],
+                      feedVideo:[],
+                      seenTimeNotifi:"",
                       createdAt: (new Date()).toString(),
                     })
             await newUser.save()
@@ -689,4 +692,57 @@ export class UserService {
           }else{return "error"}
         }catch(e){return "error"}
       }
+    
+    async updateFeedImg(newFeedImg :string[],userId){
+      try{
+        const user = await this.userModel.findOne({_id:userId})
+          if(user!=null){
+            let feedImg = user.feedImg;
+           let path= feedImg.concat(newFeedImg);
+            console.log("Mảng img mới là ------------------------")
+            console.log(path)
+            await this.userModel.updateOne({_id:userId},{feedImg:path})
+            return "done"
+          }else{return "error"}
+        
+      }catch(e){return "error"}
+    }
+    async updateManyFeedImg(newFeedImg:string [],listUserId:string[]){
+      try{
+          var api = []
+          listUserId.map(idUser=>api.push(this.updateFeedImg(newFeedImg,idUser)))
+          await Promise.all([api])
+          return "done"
+      }catch(e){return "error"}
+    }
+    async updateFeedVideo(newFeedVideo :string[],userId){
+      try{
+        const user = await this.userModel.findOne({_id:userId})
+          if(user!=null){
+            let feedVideo = user.feedVideo;
+           let path= feedVideo.concat(newFeedVideo);
+            console.log("Mảng Video mới là ------------------------")
+            console.log(path)
+            await this.userModel.updateOne({_id:userId},{feedVideo:path})
+            return "done"
+          }else{return "error"}
+        
+      }catch(e){return "error"}
+    }
+    async updateManyFeedVideo(newFeedVideo:string [],listUserId:string[]){
+      try{
+          var api = []
+          listUserId.map(idUser=>api.push(this.updateFeedVideo(newFeedVideo,idUser)))
+          await Promise.all([api])
+          return "done"
+      }catch(e){return "error"}
+    }
+    async updateSeenTimeNotifi(userId,newSeenTime){
+      try{
+        let user =await this.userModel.findOneAndUpdate({_id:userId},{seenTimeNotifi:newSeenTime});
+        if(user!=null){
+          return "done"  
+        }else{return "error"}
+      }catch(e){return "error"}
+    }
 }

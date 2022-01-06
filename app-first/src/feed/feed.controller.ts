@@ -80,9 +80,9 @@ export class FeedController {
                 this.eventsGateway.emitCommentMsg({avatar:req.user["avatarImg"][req.user["avatarImg"].length-1],realName:req.user["realName"],
                     id:req.user["_id"].toString(),feedId:params.feedId,createdAt:baseCommentDto.createdAt,messages:baseCommentDto.messages,pathImg:baseCommentDto.pathImg
                     })
-
-            }
-            return res.json("done")
+                return res.json("done")
+            }else{return res.json("error")}
+           
             
             
         }catch(e){ res.json("error")}
@@ -109,7 +109,13 @@ export class FeedController {
 
                         let result1= await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":result.toString(),"createdAt":createFeedDto.createdAt})
 
-                        await this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":result.toString(),"createdAt":createFeedDto.createdAt})
+                        Promise.all([
+                             this.notifiService.create({"type":"tagFeed","sourceUserId":req.user["_id"],"targetUserId":createFeedDto.tag,"content":result.toString(),"createdAt":createFeedDto.createdAt}),
+
+                            this.userService.updateManyFeedImg(createFeedDto.pathImg,[req.user["_id"],...createFeedDto.tag]),
+                            this.userService.updateManyFeedVideo(createFeedDto.pathVideo,[req.user["_id"],...createFeedDto.tag])
+
+                        ])
 
                         this.eventsGateway.createNewFeed({feedId:result1,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
@@ -120,7 +126,12 @@ export class FeedController {
                         
                     }else{
 
-                        await this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":result.toString(),"createdAt":createFeedDto.createdAt})
+                        await Promise.all([
+                            this.notifiService.create({"type":"newFeed","sourceUserId":req.user["_id"],"targetUserId":[],"content":result.toString(),"createdAt":createFeedDto.createdAt}),
+                            this.userService.updateFeedImg(createFeedDto.pathImg,req.user["_id"]),
+                            this.userService.updateFeedVideo(createFeedDto.pathVideo,req.user["_id"])
+
+                        ])
                         
                         this.eventsGateway.createNewFeed({feedId:result,...createFeedDto,sourceUserPathImg:req.user["avatarImg"],
                                         sourceRealnameUser:req.user["realName"],comment:[],like:[]},req.user["friend"],)
@@ -219,5 +230,18 @@ export class FeedController {
            
         }catch(e){ res.json("error")}
         
+    }
+    @Delete(":feedId/") 
+    async deleteFeed(@Param() params,
+     @Req() req :Request,@Res() res :Response,
+    ) { 
+        try {
+            console.log(params.feedId)
+            let result = await this.feedService.deleteFeed(params.feedId);
+            console.log("kết quả trả về khi delete");
+            console.log(result)
+            return res.json(result) ;
+           
+        }catch(e){ res.json("error")}    
     }
 }

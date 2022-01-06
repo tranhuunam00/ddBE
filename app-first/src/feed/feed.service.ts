@@ -232,4 +232,12 @@ export class FeedService {
             }else{return "error"}
         }catch(e){return "error"}
     }
+    async deleteFeed(feedId:string){
+        try{    
+            const feedApi = await this.feedModel.findOneAndDelete({_id:feedId})
+            if(feedApi!=null){
+                return "done"
+            }else{return "error"}
+        }catch(e){return "error"}
+    }
 }

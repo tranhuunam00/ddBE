@@ -241,6 +241,13 @@ export class UserController {
     let result = await this.userService.newHadUserChat(data.frId,req.user["_id"].toString(),req.user["hadMessageList"])
     return res.json(result)
   }
+  @Put("updateSeenTime")
+  async updateSeenTime(@Res() res:Response,@Req() req:Request,@Body() body :{seentime:string}){
+    console.log("----uppdate seentime--------- ")
+    console.log(body.seentime)
+    let result = await this.userService.updateSeenTimeNotifi(req.user["_id"].toString(),body.seentime)
+    return res.json(result)
+  }
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(id, updateUserDto);
